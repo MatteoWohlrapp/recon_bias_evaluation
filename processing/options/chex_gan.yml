@@ -1,0 +1,26 @@
+name: chex_gan_reconstruction
+results_path: ./results
+
+datasets:
+  chex:
+    enabled: true
+    dataroot_A: /path/to/chex/degraded
+    dataroot_B: /path/to/chex/original
+    csv_path_A: /path/to/chex/metadata_degraded.csv
+    csv_path_B: /path/to/chex/metadata_original.csv
+    photon_count: 100000
+    number_of_samples: null  # null for all samples
+    seed: 31415
+    split: test
+  ucsf:
+    enabled: false
+
+models:
+  unet:
+    enabled: false
+  gan:
+    enabled: true
+    network: GAN
+    model_path: /path/to/pix2pix/checkpoints/chex_gan/latest_net_G.pth
+  diffusion:
+    enabled: false 

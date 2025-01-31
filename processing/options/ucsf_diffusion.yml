@@ -1,0 +1,34 @@
+name: ucsf_diffusion_reconstruction
+results_path: ./results
+
+datasets:
+  chex:
+    enabled: false
+  ucsf:
+    enabled: true
+    dataroot: /path/to/ucsf/data
+    sampling_mask: radial  # or linear
+    number_of_samples: null
+    seed: 31415
+    type: FLAIR  # or other MRI type
+    pathology: []  # list of pathologies to include
+    lower_slice: 60
+    upper_slice: 130
+    split: test
+
+models:
+  unet:
+    enabled: false
+  gan:
+    enabled: false
+  diffusion:
+    enabled: true
+    network: diffusion
+    sde_path: /path/to/image-restoration-sde  # Path to the SDE repository root
+    opt_path: /path/to/image-restoration-sde/codes/config/deblurring/options/train/ir-sde-ucsf.yml
+    model_path: /path/to/image-restoration-sde/experiments/ucsf_diffusion/models/latest.pth
+    sde:
+      max_sigma: 50
+      T: 100
+      schedule: linear
+      eps: 0.001 
