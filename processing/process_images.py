@@ -51,7 +51,7 @@ def setup_logger(name, save_dir, filename="log.txt"):
     return logger
 
 def load_reconstruction_model(config, device):
-    model_config = config['model']
+    model_config = config['models']
     if model_config["network"] == "UNet":
         # Import from recon_bias repository's src directory
         sys.path.append(str(Path(config['paths']['recon_bias']) / 'src'))
@@ -78,8 +78,10 @@ def load_reconstruction_model(config, device):
         
     elif model_config["network"] == "Diffusion":
         # Import from image-restoration-sde repository
+        config['is_train'] = False
+        config['train'] = None
         try:
-            sde_path = Path(model_config["sde_path"])
+            sde_path = Path(config['paths']['sde'])
             if not sde_path.exists():
                 raise ValueError(f"SDE path does not exist: {sde_path}")
             
@@ -87,76 +89,28 @@ def load_reconstruction_model(config, device):
             codes_path = sde_path / "codes"
             sys.path.append(str(codes_path))
             
-            options = import_module_from_path(
-                "options",
-                str(codes_path / "config/options.py")
-            )
             models_module = import_module_from_path(
                 "models",
-                str(codes_path / "models/__init__.py")
+                str(codes_path / "config/deblurring/models/__init__.py")
             )
-            networks_module = import_module_from_path(
-                "networks",
-                str(codes_path / "models/networks.py")
-            )
+
             util = import_module_from_path(
                 "util",
-                str(codes_path / "utils/util.py")
+                str(codes_path / "utils/__init__.py")
             )
             
         except Exception as e:
             raise ImportError(f"Failed to import diffusion modules. Error: {e}")
-        
-        # Create model configuration
-        opt = {
-            'name': 'deblurring',
-            'model': 'ir',  # Image Restoration
-            'gpu_ids': [0],
-            'is_train': False,
-            'dist': False,
-            'datasets': {},  # We don't need dataset config for inference
-            'path': {
-                'root': str(sde_path),
-                'pretrain_model_G': model_config["model_path"]
-            },
-            'network_G': {
-                'which_model_G': 'ddpm',  # Using DDPM architecture
-                'unet': {
-                    'in_channel': 1,
-                    'out_channel': 1,
-                    'inner_channel': 64,
-                    'channel_multiplier': [1, 2, 4, 8],
-                    'attn_res': [16],
-                    'res_blocks': 2,
-                    'dropout': 0.2
-                },
-                'beta_schedule': {
-                    'train': {
-                        'schedule': 'linear',
-                        'n_timestep': 2000,
-                        'linear_start': 1e-6,
-                        'linear_end': 0.01
-                    }
-                },
-                'diffusion': {
-                    'image_size': 256,
-                    'channels': 1,
-                    'conditional': True
-                }
-            }
-        }
-        
-        opt = options.dict_to_nonedict(opt)
-        
+                
         # Create model
-        model = models_module.create_model(opt)
+        model = models_module.create_model(config)
         
         # Setup SDE
         sde = util.IRSDE(
-            max_sigma=model_config["sde"]["max_sigma"],
-            T=model_config["sde"]["T"],
-            schedule=model_config["sde"]["schedule"],
-            eps=model_config["sde"]["eps"],
+            max_sigma=config["sde"]["max_sigma"],
+            T=config["sde"]["T"],
+            schedule=config["sde"]["schedule"],
+            eps=config["sde"]["eps"],
             device=device
         )
         sde.set_model(model.model)
@@ -169,11 +123,12 @@ def load_reconstruction_model(config, device):
 def process_batch(batch, model, model_type, save_dir, device, dataset_type):
     # Process batch with model
     input_imgs = batch['A'].to(device)
+    gt_imgs = batch['B'].to(device)
     with torch.no_grad():
         if model_type == "Diffusion":
             model_obj, sde = model
             noisy_state = sde.noise_state(input_imgs)
-            model_obj.feed_data(noisy_state, input_imgs)
+            model_obj.feed_data(noisy_state, input_imgs, gt_imgs)
             model_obj.test(sde)
             outputs = model_obj.get_current_test_visuals()['Output']
         else:  # UNet or GAN
@@ -200,10 +155,17 @@ def process_batch(batch, model, model_type, save_dir, device, dataset_type):
                 "slice_id": slice_id,
                 "path": output_filename
             })
-            
-        new_df = pl.DataFrame(metadata)
-        new_df.write_csv(save_dir / "metadata.csv")
         
+        # Append to existing metadata if file exists, otherwise create new
+        metadata_file = save_dir / "metadata.csv"
+        new_df = pl.DataFrame(metadata)
+        if metadata_file.exists():
+            existing_df = pl.read_csv(metadata_file)
+            combined_df = pl.concat([existing_df, new_df])
+            combined_df.write_csv(metadata_file)
+        else:
+            new_df.write_csv(metadata_file)
+            
     else:  # chex or other datasets
         paths = batch['A_paths']
         for path, output in zip(paths, outputs):            
@@ -241,14 +203,14 @@ def main():
     logger.info(f'Using device: {device}')
     
     # Find enabled dataset and model
-    dataset_name = config['dataset']['name']
-    model_name = config['model']['network']
+    dataset_name = config['datasets']['name']
+    model_name = config['models']['network']
     
     # Create dataset
     if dataset_name == 'chex':
-        dataset = ChexDataset(config['dataset'], train=False)
+        dataset = ChexDataset(config['datasets'], train=False)
     elif dataset_name == 'ucsf':
-        dataset = UcsfDataset(config['dataset'], train=False)
+        dataset = UcsfDataset(config['datasets'], train=False)
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
     

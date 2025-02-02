@@ -31,7 +31,6 @@ class ChexDataset(Dataset):
         self.data_root_B = pathlib.Path(opt['dataroot_B'])
         self.csv_path_A = pathlib.Path(opt['csv_path_A'])
         self.csv_path_B = pathlib.Path(opt['csv_path_B'])
-        self.photon_count = opt['photon_count']
         self.number_of_samples = opt.get('number_of_samples', None)
         self.seed = opt.get('seed', 31415)
         self.split = "test"
@@ -90,6 +89,9 @@ class ChexDataset(Dataset):
         if self.transform:
             image_A = self.transform(image_A)
             image_B = self.transform(image_B)
+
+        image_A = image_A.squeeze(0)
+        image_B = image_B.squeeze(0)
         
         return {
             'A': image_A,    # degraded image
