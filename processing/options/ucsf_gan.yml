@@ -1,5 +1,5 @@
 name: ucsf_gan_reconstruction
-results_path: ./results
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
 batch_size: 32
 num_workers: 8
 

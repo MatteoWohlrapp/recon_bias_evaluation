@@ -1,5 +1,5 @@
 name: chex_gan_reconstruction
-results_path: ./results
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
 batch_size: 32
 num_workers: 8
 
@@ -11,9 +11,9 @@ paths:
 
 datasets:
   name: chex
-  csv_path_A: /lotterlab/project_data/CheXpert_noise/metadata_photon_100000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_100000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
-  dataroot_A: /lotterlab/project_data/CheXpert_noise
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
   seed: 31415
   split: test
