@@ -134,10 +134,32 @@ class UcsfDataset(Dataset):
         # Inverse transform
         undersampled_image = ifft2c(undersampled_kspace)
         return torch.abs(undersampled_image[..., 0])
+    
+    sex_map = {"M": 0, "F": 1}
+    diagnosis_map = {
+    "Oligodendroglioma, IDH-mutant, 1p/19q-codeleted": 0,
+    "Astrocytoma, IDH-wildtype": 1,
+    "Astrocytoma, IDH-mutant": 2,
+    "Glioblastoma, IDH-wildtype": 3,
+    }
+    
+    def _process_metadata(self, row):
+        """Extract metadata from a row."""
+        metadata = {
+            'path': str(row['file_path']) if 'file_path' in row else '',
+            'patient_id': str(row['patient_id']) if 'patient_id' in row else '',
+            'slice_id': int(row['slice_id']) if 'slice_id' in row else 0, 
+            'sex' : torch.tensor(self.sex_map[row["sex"]], dtype=torch.int64),
+            'age' : torch.tensor(row["age_at_mri"], dtype=torch.float64),
+            'cns' : 0 if row["who_cns_grade"] <= 3 else 1,
+            'diagnosis' : 0 if self.diagnosis_map[row["final_diagnosis"]] <= 2 else 1
+        }
+        return metadata
 
     def __getitem__(self, index):
         """Return a data point and its metadata information."""
         row = self.metadata.row(index, named=True)
+        metadata = self._process_metadata(row)
         
         # Load the original image
         nifti_img = nib.load(str(self.data_root / row["file_path"]))
@@ -156,12 +178,18 @@ class UcsfDataset(Dataset):
         
         # Create undersampled version
         undersampled_tensor = self.undersample_slice(slice_tensor)
+
+        slice_tensor = slice_tensor.unsqueeze(0)
+        undersampled_tensor = undersampled_tensor.unsqueeze(0)
         
         return {
-            'A': undersampled_tensor,  # undersampled image
-            'B': slice_tensor,         # fully sampled image
-            'patient_id': row["patient_id"],
-            'slice_id': row["slice_id"]
+            'image_A': undersampled_tensor,  # undersampled image
+            'image_B': slice_tensor,         # fully sampled image
+            'image_info': {
+                'patient_id': row["patient_id"],
+                'slice_id': row["slice_id"]
+            },
+            'metadata': metadata
         }
 
     def __len__(self):

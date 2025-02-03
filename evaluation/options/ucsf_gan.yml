@@ -1,15 +1,11 @@
-name: ucsf_gan_reconstruction
+name: ucsf_gan_reconstruction_test
 results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
-batch_size: 32
-num_workers: 8
-
-paths:
-  recon_bias: /lotterlab/users/matteo/code/recon_bias
-  pix2pix: /lotterlab/users/matteo/code/pix2pix
-  sde: /lotterlab/users/matteo/code/image-restoration-sde
+batch_size: 8
+num_workers: 2
 
 datasets:
   name: ucsf
+  number_of_samples: 10
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
   sampling_mask: radial  # or linear
   seed: 31415
@@ -22,4 +18,17 @@ datasets:
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/UCSF-4/pix2pix-ucsf-128-4-e200.pth
+  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/pix2pix-ucsf-128-4-e200.pth
+
+task_models: 
+  name: ucsf
+  models: 
+    - type: classifier
+      name: TGradeBCEClassifier
+      path: /lotterlab/users/matteo/models/tgrade/checkpoints/tgrade_test_20240925_113550_epoch_1_best.pth
+    - type: classifier
+      name: TTypeBCEClassifier
+      path: /lotterlab/users/matteo/models/ttype/checkpoints/ttype_test_20240925_113544_epoch_1_best.pth
+    - type: segmentation
+      name: UNet
+      path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth

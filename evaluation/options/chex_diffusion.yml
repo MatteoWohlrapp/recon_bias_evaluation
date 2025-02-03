@@ -1,4 +1,4 @@
-name: chex_SDE-10000-40-test
+name: chex_diffusion_reconstruction_test
 results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
 batch_size: 8
 num_workers: 2

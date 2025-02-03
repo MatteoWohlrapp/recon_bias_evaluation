@@ -10,12 +10,16 @@ from tqdm import tqdm
 import skimage
 import segmentation_models_pytorch as smp 
 from evaluate_chexpert import evaluate_chexpert
+from evaluate_ucsf import evaluate_ucsf
 from unet.reconstruction_model import ReconstructionModel
 from unet.unet import UNet
 from gan.GAN import UnetGenerator
 import numpy as np
 from skimage.io import imread
 from data.chex_dataset import min_max_slice_normalization
+from classifier.classification_model import TTypeBCEClassifier, TGradeBCEClassifier
+from classifier.resnet_classification_network import ResNetClassifierNetwork
+from segmentation.segmentation_model import SegmentationModel
 
 def setup_logger(name, save_dir, filename="log.txt"):
     logger = logging.getLogger(name)
@@ -78,17 +82,73 @@ def load_reconstruction_model(config, device):
                 output = output.unsqueeze(1)
                 output = output.to(device)
                 return output
+            elif config["datasets"]["name"] == "ucsf":
+                processed_images = []
+                patient_ids, slice_ids = x['image_info']['patient_id'], x['image_info']['slice_id']
+                for patient_id, slice_id in zip(patient_ids, slice_ids):
+                    slice_id = slice_id.item() if isinstance(slice_id, torch.Tensor) else slice_id
+                    # make slice id 3 digits
+                    slice_id = f"{slice_id:03d}"
+                    full_path = os.path.join(
+                        config["datasets"]["processed_image_root"], 
+                        f"{patient_id}_{slice_id}.npy"
+                    )
+                    # load and process image
+                    image = np.load(full_path)
+                    image = min_max_slice_normalization(image)
+                    processed_images.append(image)
+                output = torch.from_numpy(np.stack(processed_images, axis=0)).float()
+                output = output.unsqueeze(1)
+                output = output.to(device)
+                return output
             else:
                 raise ValueError(f"Dataset {config['datasets']['name']} not supported")
-
         return lambda x : get_processed_image(x)
     
-
 def load_task_model(config, device):
     if config["name"] == "chexpert-classifier":
         model = torch.load(config["path"], map_location=device)
         model.to(device)
         return model
+    elif config["name"] == "ucsf":
+        task_models = []
+        for model in config["models"]:
+            model_type = model["type"]
+            model_name = model["name"]
+            model_path = model["path"]
+            
+            if model_type == "classifier":
+                if model_name == "TTypeBCEClassifier":
+                    model = TTypeBCEClassifier()
+                elif model_name == "TGradeBCEClassifier":
+                    model = TGradeBCEClassifier()
+                model.to(device)
+                network = ResNetClassifierNetwork(num_classes=model.num_classes)
+                network.to(device)
+                model.set_network(network)
+                model.load_state_dict(torch.load(model_path, map_location=device))
+                model.network.eval()
+                task_models.append((model_type, model_name, model))
+            elif model_type == "segmentation":
+                model = SegmentationModel()
+                model = model.to(device)
+
+                network = smp.Unet(
+                    in_channels=1,
+                    classes=1,
+                    encoder_name="resnet34",
+                    encoder_depth=5,
+                    encoder_weights=None,
+                    decoder_channels=(256, 128, 64, 32, 16),
+                    activation="sigmoid",
+                )
+
+                network = network.to(device)
+                model.set_network(network)
+                model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+                model.network.eval()
+                task_models.append((model_type, model_name, model))
+        return task_models
     else:
         raise ValueError(f"Task model {config['name']} not found")
 
@@ -122,7 +182,9 @@ def main():
         config = yaml.safe_load(f)
 
     # Setup results directory
-    results_dir = Path(config['results_path']) / f"{config['name']}"
+    # add timestamp to results_dir
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    results_dir = Path(config['results_path']) / f"{config['name']}_{timestamp}"
     results_dir.mkdir(parents=True, exist_ok=True)
 
     logger = setup_logger('base', results_dir)
@@ -135,10 +197,11 @@ def main():
     logger.info(f'Loading {config["models"]["network"]} model...')
     reconstruction_model = load_reconstruction_model(config, device)
     task_model = load_task_model(config["task_models"], device) # before recoding sys otherwise not working
-    print(task_model)
 
     if config["datasets"]["name"] == "chex": 
         evaluate_chexpert(config, task_model, reconstruction_model, results_dir, device, logger)
+    elif config["datasets"]["name"] == "ucsf":
+        evaluate_ucsf(config, task_model, reconstruction_model, results_dir, device, logger)
 
 
 if __name__ == '__main__':

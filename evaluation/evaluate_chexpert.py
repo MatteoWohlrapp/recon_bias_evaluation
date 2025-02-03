@@ -29,6 +29,16 @@ def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number
         index += batch_size
     
         batch_results = []
+        metadata = batch['metadata']
+        for i in range(batch_size):
+            result = {
+                "path": metadata["path"][i],
+                "patient_id": metadata["patient_id"][i],
+                "sex": metadata["sex"][i],
+                "age": metadata["age"][i],
+                "race": metadata["race"][i],
+            }
+            batch_results.append(result)
 
         x_class = batch['image_A']
         x_class = x_class.to(device)
@@ -40,21 +50,10 @@ def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number
         pred = pred.squeeze(0)
         pred = torch.sigmoid(pred)
 
-        metadata = batch['metadata']
         for i in range(batch_size):
-            result = {
-                "path": metadata["path"][i],
-                "patient_id": metadata["patient_id"][i],
-                "sex": metadata["sex"][i],
-                "age": metadata["age"][i],
-                "race": metadata["race"][i],
-            }
-
             for j, pathology in enumerate(pathologies):
-                result[pathology] = float(y_class[i][j])
-                result[f"{pathology}_class"] = float(pred[i][j])
-
-            batch_results.append(result)
+                batch_results[i][pathology] = float(y_class[i][j])
+                batch_results[i][f"{pathology}_class"] = float(pred[i][j])
 
         recon = reconstruction(batch)
         pred_recon = classifier(recon)

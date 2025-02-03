@@ -1,16 +1,13 @@
-name: ucsf_SDE-08-123
+name: ucsf_diffusion_reconstruction_test
 results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
 batch_size: 8
 num_workers: 4
 
-paths:
-  recon_bias: /lotterlab/users/matteo/code/recon_bias
-  pix2pix: /lotterlab/users/matteo/code/pix2pix
-  sde: /lotterlab/users/matteo/code/image-restoration-sde
-
 datasets:
   name: ucsf
+  number_of_samples: 10
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf/ucsf_SDE-04-117
   sampling_mask: radial  # or linear
   seed: 31415
   type: FLAIR  # or other MRI type
@@ -23,30 +20,15 @@ datasets:
 models:
   network: Diffusion
 
-model: denoising
-distortion: deblur
-gpu_ids: [0]
-
-sde:
-  max_sigma: 10
-  T: 100
-  schedule: cosine # linear, cosine
-  eps: 0.005
-  
-degradation:
-  # for denoising
-  sigma: 25
-  noise_type: G
-
-
-network_G:
-  which_model_G: ConditionalUNet
-  setting:
-    in_nc: 1
-    out_nc: 1
-    nf: 64
-    depth: 4
-
-path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Noise/UCSF/Diffusion/08/123_G.pth
-  strict_load: True
+task_models: 
+  name: ucsf
+  models: 
+    - type: classifier
+      name: TGradeBCEClassifier
+      path: /lotterlab/users/matteo/models/tgrade/checkpoints/tgrade_test_20240925_113550_epoch_1_best.pth
+    - type: classifier
+      name: TTypeBCEClassifier
+      path: /lotterlab/users/matteo/models/ttype/checkpoints/ttype_test_20240925_113544_epoch_1_best.pth
+    - type: segmentation
+      name: UNet
+      path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth
