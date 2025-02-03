@@ -1,7 +1,7 @@
-name: ucsf_SDE-08-123
+name: ucsf_gan_reconstruction
 results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
-batch_size: 8
-num_workers: 4
+batch_size: 32
+num_workers: 8
 
 paths:
   recon_bias: /lotterlab/users/matteo/code/recon_bias
@@ -18,35 +18,8 @@ datasets:
   lower_slice: 60
   upper_slice: 130
   split: test
-  num_rays: 60
+  num_rays: 140
 
 models:
-  network: Diffusion
-
-model: denoising
-distortion: deblur
-gpu_ids: [0]
-
-sde:
-  max_sigma: 10
-  T: 100
-  schedule: cosine # linear, cosine
-  eps: 0.005
-  
-degradation:
-  # for denoising
-  sigma: 25
-  noise_type: G
-
-
-network_G:
-  which_model_G: ConditionalUNet
-  setting:
-    in_nc: 1
-    out_nc: 1
-    nf: 64
-    depth: 4
-
-path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Noise/UCSF/Diffusion/08/123_G.pth
-  strict_load: True
+  network: GAN
+  model_path: /lotterlab/users/matteo/models/Noise/UCSF/UCSF-4/pix2pix-ucsf-128-4-e200.pth

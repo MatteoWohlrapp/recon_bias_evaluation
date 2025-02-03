@@ -1,4 +1,4 @@
-name: chex_SDE-10000-40
+name: chex_SDE-100000-65
 results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
 batch_size: 32
 num_workers: 8
@@ -10,7 +10,7 @@ paths:
 
 datasets:
   name: chex
-  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_100000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
@@ -22,7 +22,7 @@ models:
 
 model: denoising
 distortion: deblur
-gpu_ids: [1]
+gpu_ids: [0]
 
 sde:
   max_sigma: 10
@@ -45,5 +45,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Noise/Chex/Diffusion/SDE-10000-40_G.pth
+  pretrain_model_G: /lotterlab/users/matteo/models/Noise/Chex/Diffusion/SDE-100000-latest_G.pth
   strict_load: True
