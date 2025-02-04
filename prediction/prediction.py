@@ -9,8 +9,8 @@ import sys
 from tqdm import tqdm
 import skimage
 import segmentation_models_pytorch as smp 
-from evaluate_chexpert import evaluate_chexpert
-from evaluate_ucsf import evaluate_ucsf
+from predict_chexpert import evaluate_chexpert
+from predict_ucsf import evaluate_ucsf
 from unet.reconstruction_model import ReconstructionModel
 from unet.unet import UNet
 from gan.GAN import UnetGenerator
