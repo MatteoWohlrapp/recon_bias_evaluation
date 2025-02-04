@@ -10,10 +10,21 @@ from tqdm import tqdm
 import time
 import torch
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity, mean_squared_error
+import lpips
 
 def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number_of_samples, device, logger):
     """Process all patients in the metadata file."""
     predictions = []
+
+    # Initialize LPIPS
+    loss_fn_alex = lpips.LPIPS(net='alex').to(device)
+    
+    def preprocess_for_lpips(img):
+        # Normalize to [-1, 1]
+        img = (img * 2) - 1
+        # Repeat grayscale channel 3 times for RGB
+        img = img.repeat(1, 3, 1, 1)
+        return img
 
     total_batches = len(dataloader)
     logger.info(f'Starting processing of {total_batches} batches')
@@ -67,9 +78,15 @@ def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number
         # calculate metrics
         y_recon = batch['image_B']
         for i in range(batch_size):
+            # Standard metrics
             batch_results[i]["psnr"] = peak_signal_noise_ratio(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
             batch_results[i]["ssim"] = structural_similarity(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
             batch_results[i]["nrmse"] = mean_squared_error(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze())
+            
+            # LPIPS
+            y_recon_lpips = preprocess_for_lpips(y_recon[i:i+1].to(device))
+            recon_lpips = preprocess_for_lpips(recon[i:i+1].to(device))
+            batch_results[i]["lpips"] = loss_fn_alex(y_recon_lpips, recon_lpips).item()
 
         predictions += batch_results
 

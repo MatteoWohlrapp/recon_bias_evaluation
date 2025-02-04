@@ -8,6 +8,7 @@ from tqdm import tqdm
 import torch
 import numpy as np
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity, mean_squared_error
+import lpips
 
 def dice_coefficient(y_true, y_pred):
     """
@@ -25,6 +26,16 @@ def dice_coefficient(y_true, y_pred):
 
 def predict_ucsf(dataloader, task_model, reconstruction_model, number_of_samples, device, logger):
     predictions = []
+
+    # Initialize LPIPS
+    loss_fn_alex = lpips.LPIPS(net='alex').to(device)
+    
+    def preprocess_for_lpips(img):
+        # Normalize to [-1, 1]
+        img = (img * 2) - 1
+        # Repeat grayscale channel 3 times for RGB
+        img = img.repeat(1, 3, 1, 1)
+        return img
 
     total_batches = len(dataloader)
     logger.info(f'Starting processing of {total_batches} batches')
@@ -106,6 +117,11 @@ def predict_ucsf(dataloader, task_model, reconstruction_model, number_of_samples
             batch_results[i]["psnr"] = peak_signal_noise_ratio(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
             batch_results[i]["ssim"] = structural_similarity(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
             batch_results[i]["nrmse"] = mean_squared_error(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze())
+            
+            # LPIPS
+            y_recon_lpips = preprocess_for_lpips(y_recon[i:i+1].to(device))
+            recon_lpips = preprocess_for_lpips(recon[i:i+1].to(device))
+            batch_results[i]["lpips"] = loss_fn_alex(y_recon_lpips, recon_lpips).item()
 
         predictions += batch_results
 
