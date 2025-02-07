@@ -1,0 +1,5 @@
+
+results_path: /lotterlab/users/matteo/latex/results
+csv_path: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250207_153401/ucsf-evaluation_performance_results.csv
+latex_path: /lotterlab/users/matteo/latex/templates/ucsf_performance.tex
+

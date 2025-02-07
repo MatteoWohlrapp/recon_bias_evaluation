@@ -1,17 +1,15 @@
-name: chex_diffusion_reconstruction_test
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
+name: chex_diffusion_3000
+results_path: /lotterlab/users/matteo/predictions
 batch_size: 8
-num_workers: 2
+num_workers: 1
 
 datasets:
   name: chex
-  number_of_samples: 10
-  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_3000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
-  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/chex/chex_SDE-10000-40
-  seed: 31415
+  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/chex/chex_SDE-3000-65
   split: test
 
 models:

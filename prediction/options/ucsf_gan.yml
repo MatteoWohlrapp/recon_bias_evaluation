@@ -1,11 +1,10 @@
-name: ucsf_gan_reconstruction_test
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
-batch_size: 8
-num_workers: 2
+name: ucsf_gan_4-100
+results_path: /lotterlab/users/matteo/predictions
+batch_size: 16
+num_workers: 4
 
 datasets:
   name: ucsf
-  number_of_samples: 10
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
   sampling_mask: radial  # or linear
   seed: 31415
@@ -18,7 +17,7 @@ datasets:
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/pix2pix-ucsf-128-4-e200.pth
+  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/100_net_G.pth
 
 task_models: 
   name: ucsf

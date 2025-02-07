@@ -9,6 +9,7 @@ import torch
 import numpy as np
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity, mean_squared_error
 import lpips
+from torchvision.utils import save_image
 
 def dice_coefficient(y_true, y_pred):
     """
@@ -49,88 +50,94 @@ def predict_ucsf(dataloader, task_model, reconstruction_model, number_of_samples
         if number_of_samples is not None and index >= number_of_samples:
             break
 
-        batch_size = batch['image_A'].shape[0]
-        index += batch_size
+        with torch.no_grad():
 
-        batch_results = []
-        metadata = batch['metadata']
-        for i in range(batch_size):
-            result = {
-                "path": metadata["path"][i],
-                "patient_id": metadata["patient_id"][i],
-                "sex": metadata["sex"][i],
-                "age": metadata["age"][i],
-                "cns": metadata["cns"][i],
-                "diagnosis": metadata["diagnosis"][i]
-            }
-            batch_results.append(result)
+            batch_size = batch['image_A'].shape[0]
+            index += batch_size
 
-        x = batch['image_A']
-        x = x.to(device)
+            batch_results = []
+            metadata = batch['metadata']
+            for i in range(batch_size):
+                result = {
+                    "path": metadata["path"][i],
+                    "patient_id": metadata["patient_id"][i],
+                    "sex": metadata["sex"][i],
+                    "age": metadata["age"][i],
+                    "cns": metadata["cns"][i],
+                    "diagnosis": metadata["diagnosis"][i]
+                }
+                batch_results.append(result)
 
-        y_recon = batch['image_B']
+            x = batch['image_A']
+            x = x.to(device)
 
-        for (model_type, model_name, model) in task_model:
-            if model_type == "classifier":
-                pred = model(x)
-                pred = pred.squeeze(0)
-                pred = torch.sigmoid(pred)
+            y_recon = batch['image_B']
+            y_recon = y_recon.to(device)
 
-                for i in range(batch_size):
-                    batch_results[i][model_name] = float(pred[i])
-            elif model_type == "segmentation":
-                pred = model(x)
-                pred = pred.squeeze(0)
-                pred = torch.sigmoid(pred)
-                pred = pred.detach().cpu().numpy()
-                # calculate dice score with skimage
-                dice_score = dice_coefficient(pred, y_recon.detach().cpu().numpy())
-                sum = np.sum(pred)
+            for (model_type, model_name, model) in task_model:
+                if model_type == "classifier":
+                    pred = model(y_recon)
+                    pred = pred.squeeze(0)
+                    pred = torch.sigmoid(pred)
 
-                for i in range(batch_size):
-                    batch_results[i][f"{model_name}_dice"] = float(dice_score)
-                    batch_results[i][f"{model_name}_sum"] = float(sum)
+                    for i in range(batch_size):
+                        batch_results[i][model_name] = float(pred[i])
+                elif model_type == "segmentation":
+                    pred = model(y_recon)
+                    pred = pred.squeeze(1)
+                    pred = (pred > 0.5).float()
+                    pred = pred.detach().cpu().numpy()
+                    
+                    for i in range(batch_size):
+                        # Calculate metrics per image
+                        dice_score = dice_coefficient(pred[i], batch['segmentation'][i].cpu().numpy())
+                        sum_val = np.sum(pred[i])
+                        
+                        batch_results[i][f"{model_name}_dice"] = float(dice_score)
+                        batch_results[i][f"{model_name}_sum"] = float(sum_val)
 
-        recon = reconstruction_model(batch)
-        for (model_type, model_name, model) in task_model:
-            if model_type == "classifier":
-                pred = model(recon)
-                pred = pred.squeeze(0)
-                pred = torch.sigmoid(pred)
+            recon = reconstruction_model(batch)
 
-                for i in range(batch_size):
-                    batch_results[i][f"{model_name}_recon"] = float(pred[i])
-            elif model_type == "segmentation":
-                pred = model(recon)
-                pred = pred.squeeze(0)
-                pred = torch.sigmoid(pred)
-                pred = pred.detach().cpu().numpy()
-                # calculate dice score with skimage
-                dice_score = dice_coefficient(pred, y_recon.detach().cpu().numpy())
-                sum = np.sum(pred)
+            for (model_type, model_name, model) in task_model:
+                if model_type == "classifier":
+                    pred = model(recon)
+                    pred = pred.squeeze(0)
+                    pred = torch.sigmoid(pred)
 
-                for i in range(batch_size):
-                    batch_results[i][f"{model_name}_recon_dice"] = float(dice_score)
-                    batch_results[i][f"{model_name}_recon_sum"] = float(sum)
+                    for i in range(batch_size):
+                        batch_results[i][f"{model_name}_recon"] = float(pred[i])
+                elif model_type == "segmentation":
+                    pred = model(recon)
+                    pred = pred.squeeze(1)
+                    pred = (pred > 0.5).float()
+                    pred = pred.detach().cpu().numpy()
+                    
+                    for i in range(batch_size):
+                        # Calculate metrics per image
+                        dice_score = dice_coefficient(pred[i], batch['segmentation'][i].cpu().numpy())
+                        sum_val = np.sum(pred[i])
+                        
+                        batch_results[i][f"{model_name}_recon_dice"] = float(dice_score)
+                        batch_results[i][f"{model_name}_recon_sum"] = float(sum_val)
 
-        for i in range(batch_size):
-            batch_results[i]["psnr"] = peak_signal_noise_ratio(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
-            batch_results[i]["ssim"] = structural_similarity(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
-            batch_results[i]["nrmse"] = mean_squared_error(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze())
-            
-            # LPIPS
-            y_recon_lpips = preprocess_for_lpips(y_recon[i:i+1].to(device))
-            recon_lpips = preprocess_for_lpips(recon[i:i+1].to(device))
-            batch_results[i]["lpips"] = loss_fn_alex(y_recon_lpips, recon_lpips).item()
+            for i in range(batch_size):
+                batch_results[i]["psnr"] = peak_signal_noise_ratio(y_recon[i].cpu().detach().numpy().squeeze(), recon[i].cpu().detach().numpy().squeeze(), data_range=1)
+                batch_results[i]["ssim"] = structural_similarity(y_recon[i].cpu().detach().numpy().squeeze(), recon[i].cpu().detach().numpy().squeeze(), data_range=1)
+                batch_results[i]["nrmse"] = mean_squared_error(y_recon[i].cpu().detach().numpy().squeeze(), recon[i].cpu().detach().numpy().squeeze())
+                
+                # LPIPS
+                y_recon_lpips = preprocess_for_lpips(y_recon[i].to(device))
+                recon_lpips = preprocess_for_lpips(recon[i].to(device))
+                batch_results[i]["lpips"] = loss_fn_alex(y_recon_lpips, recon_lpips).item()
 
-        predictions += batch_results
+            predictions += batch_results
 
-        if (batch_idx + 1) % 10 == 0:
-            elapsed = time.time() - start_time
-            progress_bar.set_postfix({
-                'batches/s': f'{batch_idx/elapsed:.2f}',
-                'processed': batch_idx + 1
-            })
+            if (batch_idx + 1) % 10 == 0:
+                elapsed = time.time() - start_time
+                progress_bar.set_postfix({
+                    'batches/s': f'{batch_idx/elapsed:.2f}',
+                    'processed': batch_idx + 1
+                })
 
     total_time = time.time() - start_time
     logger.info(f'Processing complete! Total time: {total_time:.2f}s, '

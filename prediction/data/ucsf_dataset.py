@@ -69,7 +69,7 @@ class UcsfDataset(Dataset):
             
         # Filter by split
         df = df.filter(pl.col("split") == self.split)
-            
+                    
         # Sample if number_of_samples is specified
         if self.number_of_samples is not None and self.number_of_samples > 0:
             df = df.sample(n=self.number_of_samples, seed=self.seed)
@@ -181,10 +181,21 @@ class UcsfDataset(Dataset):
 
         slice_tensor = slice_tensor.unsqueeze(0)
         undersampled_tensor = undersampled_tensor.unsqueeze(0)
+
+        segmentation_path = row["file_path"].replace(self.type, "tumor_segmentation")
+        nifti_img = nib.load(str(self.data_root / segmentation_path))
+        segmentation = nifti_img.get_fdata()
+        segmentation_slice = segmentation[:, :, row["slice_id"]]
+        segmentation_slice[segmentation_slice == 2] = 1
+        segmentation_slice[segmentation_slice == 4] = 0
+
+        segmentation_slice = torch.from_numpy(segmentation_slice).float().unsqueeze(0)
+        segmentation_slice = transforms.functional.resize(segmentation_slice, (256, 256))
         
         return {
             'image_A': undersampled_tensor,  # undersampled image
             'image_B': slice_tensor,         # fully sampled image
+            'segmentation': segmentation_slice,
             'image_info': {
                 'patient_id': row["patient_id"],
                 'slice_id': row["slice_id"]

@@ -1,0 +1,34 @@
+
+name: chex-evaluation
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: chex
+
+predictions: 
+    - photon_count: 100000
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/chex_unet_100000_20250207_163451/chex_unet_100000_results.csv'
+    - photon_count: 10000
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/chex_unet_10000_20250204_202344/chex_unet_10000_results.csv'
+    - photon_count: 3000
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/chex_unet_3000_20250204_195801/chex_unet_3000_results.csv'
+    - photon_count: 100000
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/chex_gan_100000_20250204_203134/chex_gan_100000_results.csv'
+    - photon_count: 10000
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/chex_gan_10000_20250204_201346/chex_gan_10000_results.csv'
+    - photon_count: 3000
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/chex_gan_3000_20250204_194757/chex_gan_3000_results.csv'
+    - photon_count: 100000
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/chex_diffusion_100000_20250204_210632/chex_diffusion_100000_results.csv'
+    - photon_count: 10000
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/chex_diffusion_10000_20250204_210108/chex_diffusion_10000_results.csv'
+    - photon_count: 3000
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/chex_diffusion_3000_20250205_085155/chex_diffusion_3000_results.csv'

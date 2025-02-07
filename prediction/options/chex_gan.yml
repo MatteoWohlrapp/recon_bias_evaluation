@@ -1,11 +1,10 @@
-name: chex_gan_reconstruction_test
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
-batch_size: 8
-num_workers: 2
+name: chex_gan_100000
+results_path: /lotterlab/users/matteo/predictions
+batch_size: 16
+num_workers: 4
 
 datasets:
   name: chex
-  number_of_samples: 10
   csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_100000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise

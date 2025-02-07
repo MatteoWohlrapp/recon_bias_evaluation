@@ -1,11 +1,10 @@
-name: ucsf_unet_reconstruction_test
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
+name: ucsf_unet_8
+results_path: /lotterlab/users/matteo/predictions
 batch_size: 8
 num_workers: 2
 
 datasets:
   name: ucsf
-  number_of_samples: 10
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
   sampling_mask: radial
   seed: 31415
@@ -14,11 +13,11 @@ datasets:
   lower_slice: 60
   upper_slice: 130
   split: test
-  num_rays: 140
+  num_rays: 60
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/Unet/unet-4_20250129_184319/checkpoints/unet-4_20250129_184319_epoch_19_best.pth
+  model_path: /lotterlab/users/matteo/models/Noise/UCSF/Unet/unet-8_20250106_102815/checkpoints/unet-8_20250106_102815_epoch_11_best.pth
 
 task_models: 
   name: ucsf

@@ -1,0 +1,34 @@
+
+name: ucsf-evaluation
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: ucsf
+
+predictions: 
+    - acceleration: 4
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_4_20250207_144108/ucsf_unet_4_results.csv'
+    - acceleration: 8
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_8_20250207_150102/ucsf_unet_8_results.csv'
+    - acceleration: 16
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_16_20250207_143017/ucsf_unet_16_results.csv'
+    - acceleration: 4
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_4-100_20250207_150553/ucsf_gan_4-100_results.csv'
+    - acceleration: 8
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_8_20250207_150001/ucsf_gan_8_results.csv'
+    - acceleration: 16
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_16_20250207_144308/ucsf_gan_16_results.csv'
+    - acceleration: 4
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_4_20250207_150428/ucsf_diffusion_4_results.csv'
+    - acceleration: 8
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_8_20250207_145910/ucsf_diffusion_8_results.csv'
+    - acceleration: 16
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_16_20250207_145053/ucsf_diffusion_16_results.csv'

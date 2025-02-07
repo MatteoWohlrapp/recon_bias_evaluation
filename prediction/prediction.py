@@ -9,10 +9,11 @@ import sys
 from tqdm import tqdm
 import skimage
 import segmentation_models_pytorch as smp 
-from predict_chexpert import evaluate_chexpert
+from predict_chex import evaluate_chexpert
 from predict_ucsf import evaluate_ucsf
 from unet.reconstruction_model import ReconstructionModel
-from unet.unet import UNet
+from unet.unet_chex import UNetChex
+from unet.unet_ucsf import UNetUCSF
 from gan.GAN import UnetGenerator
 import numpy as np
 from skimage.io import imread
@@ -20,6 +21,8 @@ from data.chex_dataset import min_max_slice_normalization
 from classifier.classification_model import TTypeBCEClassifier, TGradeBCEClassifier
 from classifier.resnet_classification_network import ResNetClassifierNetwork
 from segmentation.segmentation_model import SegmentationModel
+import torch.multiprocessing
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 def setup_logger(name, save_dir, filename="log.txt"):
     logger = logging.getLogger(name)
@@ -45,7 +48,12 @@ def load_reconstruction_model(config, device):
     if model_config["network"] == "UNet":
             
         model = ReconstructionModel()
-        network = UNet()
+        if config["datasets"]["name"] == "chex":
+            print("Loading UNetChex")
+            network = UNetChex()
+        elif config["datasets"]["name"] == "ucsf":
+            print("Loading UNetUCSF")
+            network = UNetUCSF()
         model.set_network(network)
         model.load_state_dict(torch.load(model_config["model_path"], map_location=device))
         model.network.eval()
@@ -172,7 +180,7 @@ def setup_logger(name, save_dir, filename="log.txt"):
     return logger
 
 def main():
-    #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, required=True, help='Path to options YAML file.')
     args = parser.parse_args()
