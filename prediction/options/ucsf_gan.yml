@@ -1,4 +1,4 @@
-name: ucsf_gan_4-100
+name: ucsf_gan_4
 results_path: /lotterlab/users/matteo/predictions
 batch_size: 16
 num_workers: 4
@@ -17,7 +17,7 @@ datasets:
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/100_net_G.pth
+  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/200_net_G.pth
 
 task_models: 
   name: ucsf

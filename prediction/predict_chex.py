@@ -71,8 +71,8 @@ def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number
 
             recon = reconstruction(batch)
             pred_recon = classifier(recon)
-            print(f"min: {recon.min()}, max: {recon.max()}, mean: {recon.mean()}")
-            print(f"min: {y_recon.min()}, max: {y_recon.max()}, mean: {y_recon.mean()}")
+            #print(f"min: {recon.min()}, max: {recon.max()}, mean: {recon.mean()}")
+            #print(f"min: {y_recon.min()}, max: {y_recon.max()}, mean: {y_recon.mean()}")
             # normalize recon to [0, 1]
             recon = (recon - recon.min()) / (recon.max() - recon.min())
             pred_recon = pred_recon.squeeze(0)
@@ -86,7 +86,7 @@ def predict_chexpert(dataloader, pathologies, classifier, reconstruction, number
             for i in range(batch_size):
                 # Standard metrics
                 psnr = peak_signal_noise_ratio(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
-                print(f"psnr: {psnr}")
+                #print(f"psnr: {psnr}")
                 batch_results[i]["psnr"] = peak_signal_noise_ratio(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
                 batch_results[i]["ssim"] = structural_similarity(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze(), data_range=1)
                 batch_results[i]["nrmse"] = mean_squared_error(y_recon[i].detach().cpu().numpy().squeeze(), recon[i].detach().cpu().numpy().squeeze())

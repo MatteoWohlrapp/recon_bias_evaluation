@@ -14,7 +14,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/models/Noise/Chex/unet-chex-07_20250109_151718/checkpoints/unet-chex-07_20250109_151718_epoch_19_best.pth
+  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-chex-100000_20250207_194447/checkpoints/unet-chex-100000_20250207_194447_epoch_19.pth
 
 task_models: 
   name: chexpert-classifier

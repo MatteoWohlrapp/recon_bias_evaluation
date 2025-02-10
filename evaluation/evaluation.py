@@ -49,10 +49,10 @@ def main():
 
     if config['dataset'] == 'ucsf':
         logger.info('Evaluating UCSF dataset')
-        evaluate_ucsf(config, logger, results_dir, config['name'])
+        evaluate_ucsf(config, results_dir, config['name'])
     elif config['dataset'] == 'chex':
         logger.info('Evaluating CHEX dataset')
-        evaluate_chex(config, logger, results_dir, config['name'])
+        evaluate_chex(config, results_dir, config['name'])
     else:
         raise ValueError(f'Dataset {config["dataset"]} not supported')
 
