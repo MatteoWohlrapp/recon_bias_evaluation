@@ -249,7 +249,6 @@ class TGradeBCEClassifier(ClassifierModel):
         return torch.sigmoid(logits)
 
 
-
 class NLLSurvClassifier(ClassifierModel):
     """
     Classifier for survival prediction using negative log likelihood loss.

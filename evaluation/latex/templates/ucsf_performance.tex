@@ -1,0 +1,23 @@
+\begin{table}[]
+    \centering
+    \caption{UCSF-PDGM image metrics and prediction performance when applied to the reconstructed images. Baseline is the prediction on the ground truth images}\label{tab:ucsf_perf}
+    \begin{tabular}{cll|cccc}
+    \hline
+    \multicolumn{1}{l}{\textbf{Acceleration}} & \multicolumn{2}{c|}{\textbf{Metrics}}         & \textbf{Baseline} & \textbf{U-Net} & \textbf{Pix2Pix} & \textbf{SDE} \\ \hline
+    \multirow{5}{*}{4}               & \multirow{2}{*}{\textbf{AUROC}} & \textbf{Tumor Type}  &    4-baseline-ttype      &   4-unet-ttype   &  4-pix2pix-ttype   &     4-sde-ttype     \\
+                                     &                        & \textbf{Tumor Grade} &   4-baseline-tgrade       &   4-unet-tgrade   &  4-pix2pix-tgrade   &     4-sde-tgrade     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{Dice}}            &  4-baseline-dice        &   4-unet-dice   &  4-pix2pix-dice   &     4-sde-dice     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{PSNR}}            &     \cellcolor[HTML]{C0C0C0}    &   4-unet-psnr   &  4-pix2pix-psnr   &     4-sde-psnr     \\
+                                     & \multicolumn{2}{l|}{\textbf{LPIPS}}           &     \cellcolor[HTML]{C0C0C0}     &   4-unet-lpips   &  4-pix2pix-lpips   &     4-sde-lpips     \\ \hline
+    \multirow{5}{*}{8}               & \multirow{2}{*}{\textbf{AUROC}} & \textbf{Tumor Type}  &   8-baseline-ttype       &   8-unet-ttype   &  8-pix2pix-ttype   &     8-sde-ttype     \\
+                                     &                        & \textbf{Tumor Grade} &   8-baseline-tgrade       &   8-unet-tgrade   &  8-pix2pix-tgrade   &     8-sde-tgrade     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{Dice}}            &  8-baseline-dice        &   8-unet-dice   &  8-pix2pix-dice   &     8-sde-dice     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{PSNR}}            &   \cellcolor[HTML]{C0C0C0}      &   8-unet-psnr   &  8-pix2pix-psnr   &     8-sde-psnr     \\
+                                     & \multicolumn{2}{l|}{\textbf{LPIPS}}           &   \cellcolor[HTML]{C0C0C0}       &   8-unet-lpips   &  8-pix2pix-lpips   &     8-sde-lpips     \\ \hline
+    \multirow{5}{*}{16}               & \multirow{2}{*}{\textbf{AUROC}} & \textbf{Tumor Type}  &   16-baseline-ttype       &   16-unet-ttype   &  16-pix2pix-ttype   &     16-sde-ttype     \\
+                                     &                        & \textbf{Tumor Grade} &   16-baseline-tgrade       &   16-unet-tgrade   &  16-pix2pix-tgrade   &     16-sde-tgrade     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{Dice}}            &  16-baseline-dice        &   16-unet-dice   &  16-pix2pix-dice   &     16-sde-dice     \\ \cline{2-3}
+                                     & \multicolumn{2}{l|}{\textbf{PSNR}}            &   \cellcolor[HTML]{C0C0C0}      &   16-unet-psnr   &  16-pix2pix-psnr   &     16-sde-psnr     \\
+                                     & \multicolumn{2}{l|}{\textbf{LPIPS}}           &   \cellcolor[HTML]{C0C0C0}       &   16-unet-lpips   &  16-pix2pix-lpips   &     16-sde-lpips     \\ \hline
+    \end{tabular}
+    \end{table}

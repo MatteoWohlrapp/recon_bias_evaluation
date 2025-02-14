@@ -1,0 +1,43 @@
+
+name: ucsf-evaluation-fairness-unet-8
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: ucsf
+
+predictions: 
+    - acceleration: 4
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_4_20250207_144108/ucsf_unet_4_results.csv'
+      fairness: False
+    - acceleration: 8
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_8_fairness_20250213_182834/ucsf_unet_8_fairness_results.csv'
+      fairness: True
+    - acceleration: 16
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_unet_16_20250207_143017/ucsf_unet_16_results.csv'
+      fairness: False
+    - acceleration: 4
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_4_20250208_114527/ucsf_gan_4_results.csv'
+      fairness: False
+    - acceleration: 8
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_8_20250207_150001/ucsf_gan_8_results.csv'
+      fairness: True
+    - acceleration: 16
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_gan_16_20250207_144308/ucsf_gan_16_results.csv'
+      fairness: False
+    - acceleration: 4
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_4_20250207_150428/ucsf_diffusion_4_results.csv'
+      fairness: False
+    - acceleration: 8
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_8_20250207_145910/ucsf_diffusion_8_results.csv'
+      fairness: True
+    - acceleration: 16
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/ucsf_diffusion_16_20250207_145053/ucsf_diffusion_16_results.csv'
+      fairness: False

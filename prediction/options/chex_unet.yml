@@ -1,11 +1,11 @@
-name: chex_unet_100000
+name: chex_unet_10000
 results_path: /lotterlab/users/matteo/predictions
 batch_size: 8
 num_workers: 2
 
 datasets:
   name: chex
-  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_100000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
@@ -14,7 +14,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-chex-100000_20250207_194447/checkpoints/unet-chex-100000_20250207_194447_epoch_19.pth
+  model_path: /lotterlab/users/matteo/models/Noise/Chex/unet-chex-10000_20250210_170539/checkpoints/unet-chex-10000_20250210_170539_epoch_20_best.pth
 
 task_models: 
   name: chexpert-classifier

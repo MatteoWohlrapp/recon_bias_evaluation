@@ -10,6 +10,7 @@ from torch.utils.data import Dataset
 from fastmri import fft2c, ifft2c
 from fastmri.data.subsample import RandomMaskFunc
 
+
 def min_max_slice_normalization(scan: torch.Tensor) -> torch.Tensor:
     scan_min = scan.min()
     scan_max = scan.max()
@@ -18,45 +19,49 @@ def min_max_slice_normalization(scan: torch.Tensor) -> torch.Tensor:
     normalized_scan = (scan - scan_min) / (scan_max - scan_min)
     return normalized_scan
 
+
 class UcsfDataset(Dataset):
     """Dataset for MRI reconstruction."""
+
     def __init__(self, opt):
         """Initialize this dataset class.
-        
+
         Parameters:
             opt (dict) -- stores all the experiment flags
             train (bool) -- whether we are in training mode
         """
-        self.data_root = pathlib.Path(opt['dataroot'])
-        self.sampling_mask = opt.get('sampling_mask', 'radial')
-        self.number_of_samples = opt.get('number_of_samples', None)
-        self.seed = opt.get('seed', 31415)
-        self.type = opt.get('type', 'FLAIR')
-        self.pathology = opt.get('pathology', [])
-        self.lower_slice = opt.get('lower_slice', 60)
-        self.upper_slice = opt.get('upper_slice', 130)
+        self.data_root = pathlib.Path(opt["dataroot"])
+        self.sampling_mask = opt.get("sampling_mask", "radial")
+        self.number_of_samples = opt.get("number_of_samples", None)
+        self.seed = opt.get("seed", 31415)
+        self.type = opt.get("type", "FLAIR")
+        self.pathology = opt.get("pathology", [])
+        self.lower_slice = opt.get("lower_slice", 60)
+        self.upper_slice = opt.get("upper_slice", 130)
         self.split = "test"
-        self.num_rays = opt.get('num_rays', 140)
-        
+        self.num_rays = opt.get("num_rays", 140)
+
         # Load metadata
         self.metadata = self._load_metadata()
-        
+
         # Set up transforms
-        self.transform = transforms.Compose([
-            min_max_slice_normalization,
-            transforms.Resize((256, 256), antialias=True),
-        ])
+        self.transform = transforms.Compose(
+            [
+                min_max_slice_normalization,
+                transforms.Resize((256, 256), antialias=True),
+            ]
+        )
 
     def _load_metadata(self):
         """Load metadata for the dataset from CSV file."""
         import polars as pl
-        
+
         metadata_file = self.data_root / "metadata.csv"
         if not metadata_file.exists():
             raise FileNotFoundError(f"Metadata file not found: {metadata_file}")
-            
+
         df = pl.read_csv(metadata_file)
-        
+
         # Apply filters based on parameters
         if self.type:
             df = df.filter(pl.col("type") == self.type)
@@ -66,10 +71,10 @@ class UcsfDataset(Dataset):
             df = df.filter(pl.col("slice_id") >= self.lower_slice)
         if self.upper_slice is not None:
             df = df.filter(pl.col("slice_id") <= self.upper_slice)
-            
+
         # Filter by split
         df = df.filter(pl.col("split") == self.split)
-                    
+
         # Sample if number_of_samples is specified
         if self.number_of_samples is not None and self.number_of_samples > 0:
             df = df.sample(n=self.number_of_samples, seed=self.seed)
@@ -90,7 +95,7 @@ class UcsfDataset(Dataset):
         Y, X = np.ogrid[:H, :W]
         mask = np.zeros((H, W), dtype=np.float32)
         angles = np.linspace(0, 2 * np.pi, self.num_rays, endpoint=False)
-        
+
         for angle in angles:
             line_x = np.cos(angle)
             line_y = np.sin(angle)
@@ -119,10 +124,10 @@ class UcsfDataset(Dataset):
         """Undersample an MRI slice using specified mask."""
         # Convert real slice to complex-valued tensor
         complex_slice = self.convert_to_complex(slice_tensor)
-        
+
         # Transform to k-space
         kspace = fft2c(complex_slice)
-        
+
         # Apply mask
         if self.sampling_mask == "radial":
             undersampled_kspace = self.apply_radial_mask_to_kspace(kspace)
@@ -130,29 +135,29 @@ class UcsfDataset(Dataset):
             undersampled_kspace = self.apply_linear_mask_to_kspace(kspace)
         else:
             raise ValueError(f"Unsupported sampling mask: {self.sampling_mask}")
-            
+
         # Inverse transform
         undersampled_image = ifft2c(undersampled_kspace)
         return torch.abs(undersampled_image[..., 0])
-    
+
     sex_map = {"M": 0, "F": 1}
     diagnosis_map = {
-    "Oligodendroglioma, IDH-mutant, 1p/19q-codeleted": 0,
-    "Astrocytoma, IDH-wildtype": 1,
-    "Astrocytoma, IDH-mutant": 2,
-    "Glioblastoma, IDH-wildtype": 3,
+        "Oligodendroglioma, IDH-mutant, 1p/19q-codeleted": 0,
+        "Astrocytoma, IDH-wildtype": 1,
+        "Astrocytoma, IDH-mutant": 2,
+        "Glioblastoma, IDH-wildtype": 3,
     }
-    
+
     def _process_metadata(self, row):
         """Extract metadata from a row."""
         metadata = {
-            'path': str(row['file_path']) if 'file_path' in row else '',
-            'patient_id': str(row['patient_id']) if 'patient_id' in row else '',
-            'slice_id': int(row['slice_id']) if 'slice_id' in row else 0, 
-            'sex' : torch.tensor(self.sex_map[row["sex"]], dtype=torch.int64),
-            'age' : torch.tensor(row["age_at_mri"], dtype=torch.float64),
-            'cns' : 0 if row["who_cns_grade"] <= 3 else 1,
-            'diagnosis' : 0 if self.diagnosis_map[row["final_diagnosis"]] <= 2 else 1
+            "path": str(row["file_path"]) if "file_path" in row else "",
+            "patient_id": str(row["patient_id"]) if "patient_id" in row else "",
+            "slice_id": int(row["slice_id"]) if "slice_id" in row else 0,
+            "sex": torch.tensor(self.sex_map[row["sex"]], dtype=torch.int64),
+            "age": torch.tensor(row["age_at_mri"], dtype=torch.float64),
+            "cns": 0 if row["who_cns_grade"] <= 3 else 1,
+            "diagnosis": 0 if self.diagnosis_map[row["final_diagnosis"]] <= 2 else 1,
         }
         return metadata
 
@@ -160,22 +165,22 @@ class UcsfDataset(Dataset):
         """Return a data point and its metadata information."""
         row = self.metadata.row(index, named=True)
         metadata = self._process_metadata(row)
-        
+
         # Load the original image
         nifti_img = nib.load(str(self.data_root / row["file_path"]))
         scan = nifti_img.get_fdata()
         slice_tensor = torch.from_numpy(scan[:, :, row["slice_id"]]).float()
-        
+
         # Add channel dimension before applying transforms
         slice_tensor = slice_tensor.unsqueeze(0)  # Shape becomes [1, H, W]
-        
+
         # Apply transforms
         if self.transform:
             slice_tensor = self.transform(slice_tensor)
 
         # Remove channel dimension after applying transforms
         slice_tensor = slice_tensor.squeeze(0)  # Shape becomes [H, W]
-        
+
         # Create undersampled version
         undersampled_tensor = self.undersample_slice(slice_tensor)
 
@@ -190,19 +195,21 @@ class UcsfDataset(Dataset):
         segmentation_slice[segmentation_slice == 4] = 0
 
         segmentation_slice = torch.from_numpy(segmentation_slice).float().unsqueeze(0)
-        segmentation_slice = transforms.functional.resize(segmentation_slice, (256, 256))
-        
+        segmentation_slice = transforms.functional.resize(
+            segmentation_slice, (256, 256)
+        )
+
         return {
-            'image_A': undersampled_tensor,  # undersampled image
-            'image_B': slice_tensor,         # fully sampled image
-            'segmentation': segmentation_slice,
-            'image_info': {
-                'patient_id': row["patient_id"],
-                'slice_id': row["slice_id"]
+            "image_A": undersampled_tensor,  # undersampled image
+            "image_B": slice_tensor,  # fully sampled image
+            "segmentation": segmentation_slice,
+            "image_info": {
+                "patient_id": row["patient_id"],
+                "slice_id": row["slice_id"],
             },
-            'metadata': metadata
+            "metadata": metadata,
         }
 
     def __len__(self):
         """Return the total number of images."""
-        return len(self.metadata) 
+        return len(self.metadata)

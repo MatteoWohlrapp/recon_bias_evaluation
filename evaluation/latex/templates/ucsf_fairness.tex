@@ -1,0 +1,45 @@
+\begin{table}[]
+    \centering
+    \caption{UCSF-PDGM classification fairness for age}\label{tab:ucsf_age}
+    \begin{tabular}{l|llllllll}
+    \hline
+    \multirow{2}{*}{\textbf{Pathology}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                       & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP} & \textbf{EODD} & \textbf{EOP} \\ \hline
+                                                                \textbf{Tumor Grade}  & baseline-tgrade-age-EODD & baseline-tgrade-age-EOP & unet-tgrade-age-EODD & unet-tgrade-age-EOP & pix2pix-tgrade-age-EODD & pix2pix-tgrade-age-EOP & sde-tgrade-age-EODD & sde-tgrade-age-EOP \\        
+                                                              \textbf{Tumor Type} & baseline-ttype-age-EODD & baseline-ttype-age-EOP & unet-ttype-age-EODD & unet-ttype-age-EOP & pix2pix-ttype-age-EODD & pix2pix-ttype-age-EOP & sde-ttype-age-EODD & sde-ttype-age-EOP \\ \hline
+    \end{tabular}
+    \end{table}
+    
+    \begin{table}[]
+        \centering
+        \caption{UCSF-PDGM classification fairness for gender}\label{tab:ucsf_gender}
+        \begin{tabular}{l|llllllll}
+        \hline
+        \multirow{2}{*}{\textbf{Pathology}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                           & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP} & \textbf{EODD} & \textbf{EOP} \\ \hline
+                                                                    \textbf{Tumor Grade}  & baseline-tgrade-gender-EODD & baseline-tgrade-gender-EOP & unet-tgrade-gender-EODD & unet-tgrade-gender-EOP & pix2pix-tgrade-gender-EODD & pix2pix-tgrade-gender-EOP & sde-tgrade-gender-EODD & sde-tgrade-gender-EOP \\        
+                                                                  \textbf{Tumor Type} & baseline-ttype-gender-EODD & baseline-ttype-gender-EOP & unet-ttype-gender-EODD & unet-ttype-gender-EOP & pix2pix-ttype-gender-EODD & pix2pix-ttype-gender-EOP & sde-ttype-gender-EODD & sde-ttype-gender-EOP \\ \hline
+        \end{tabular}
+        \end{table}
+    
+    \begin{table}[]
+        \centering
+        \caption{UCSF-PDGM segmentation fairness metrics for age}\label{tab:ucsf_age_seg}
+        \begin{tabular}{l|llllllll}
+        \hline
+        \multirow{2}{*}{\textbf{Metric}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                            & \textbf{SER} & \textbf{$\Delta$ Dice}  & \textbf{SER} & \textbf{$\Delta$ Dice}  & \textbf{SER} & \textbf{$\Delta$ Dice} & \textbf{SER} & \textbf{$\Delta$ Dice} \\ \hline
+                                                                    \textbf{Dice}  & baseline-dice-age-SER & baseline-dice-age-delta-dice & unet-dice-age-SER & unet-dice-age-delta-dice & pix2pix-dice-age-SER & pix2pix-dice-age-delta-dice & sde-dice-age-SER & sde-dice-age-delta-dice \\ \hline
+        \end{tabular}
+        \end{table}
+
+    \begin{table}[]
+        \centering
+        \caption{UCSF-PDGM segmentation fairness metrics for gender}\label{tab:ucsf_gender_seg}
+        \begin{tabular}{l|llllllll}
+        \hline
+        \multirow{2}{*}{\textbf{Metric}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                            & \textbf{SER} & \textbf{$\Delta$ Dice}  & \textbf{SER} & \textbf{$\Delta$ Dice}  & \textbf{SER} & \textbf{$\Delta$ Dice} & \textbf{SER} & \textbf{$\Delta$ Dice} \\ \hline
+                                                                    \textbf{Dice}  & baseline-dice-gender-SER & baseline-dice-gender-delta-dice & unet-dice-gender-SER & unet-dice-gender-delta-dice & pix2pix-dice-gender-SER & pix2pix-dice-gender-delta-dice & sde-dice-gender-SER & sde-dice-gender-delta-dice \\ \hline
+        \end{tabular}
+        \end{table}

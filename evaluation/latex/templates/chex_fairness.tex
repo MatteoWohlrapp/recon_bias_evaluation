@@ -1,0 +1,69 @@
+\begin{table}[]
+    \centering
+    \caption{CheXpert classification fairness for age}\label{tab:chex_age}
+    \begin{tabular}{l|llllllll}
+    \hline
+    \multirow{2}{*}{\textbf{}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                       & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP} & \textbf{EODD} & \textbf{EOP} \\ \hline
+    \textbf{Atelectasis}  & baseline-atelectasis-age-EODD & baseline-atelectasis-age-EOP & unet-atelectasis-age-EODD & unet-atelectasis-age-EOP & pix2pix-atelectasis-age-EODD & pix2pix-atelectasis-age-EOP & sde-atelectasis-age-EODD & sde-atelectasis-age-EOP \\        
+    \textbf{Cardiomegaly} & baseline-cardiomegaly-age-EODD & baseline-cardiomegaly-age-EOP & unet-cardiomegaly-age-EODD & unet-cardiomegaly-age-EOP & pix2pix-cardiomegaly-age-EODD & pix2pix-cardiomegaly-age-EOP & sde-cardiomegaly-age-EODD & sde-cardiomegaly-age-EOP \\
+    \textbf{Consolidation} & baseline-consolidation-age-EODD & baseline-consolidation-age-EOP & unet-consolidation-age-EODD & unet-consolidation-age-EOP & pix2pix-consolidation-age-EODD & pix2pix-consolidation-age-EOP & sde-consolidation-age-EODD & sde-consolidation-age-EOP \\
+    \textbf{Edema} & baseline-edema-age-EODD & baseline-edema-age-EOP & unet-edema-age-EODD & unet-edema-age-EOP & pix2pix-edema-age-EODD & pix2pix-edema-age-EOP & sde-edema-age-EODD & sde-edema-age-EOP \\
+    \textbf{EC} & baseline-ec-age-EODD & baseline-ec-age-EOP & unet-ec-age-EODD & unet-ec-age-EOP & pix2pix-ec-age-EODD & pix2pix-ec-age-EOP & sde-ec-age-EODD & sde-ec-age-EOP \\
+    \textbf{Fracture} & baseline-fracture-age-EODD & baseline-fracture-age-EOP & unet-fracture-age-EODD & unet-fracture-age-EOP & pix2pix-fracture-age-EODD & pix2pix-fracture-age-EOP & sde-fracture-age-EODD & sde-fracture-age-EOP \\
+    \textbf{Lung Lesion} & baseline-lung-lesion-age-EODD & baseline-lung-lesion-age-EOP & unet-lung-lesion-age-EODD & unet-lung-lesion-age-EOP & pix2pix-lung-lesion-age-EODD & pix2pix-lung-lesion-age-EOP & sde-lung-lesion-age-EODD & sde-lung-lesion-age-EOP \\
+    \textbf{Lung Opacity} & baseline-lung-opacity-age-EODD & baseline-lung-opacity-age-EOP & unet-lung-opacity-age-EODD & unet-lung-opacity-age-EOP & pix2pix-lung-opacity-age-EODD & pix2pix-lung-opacity-age-EOP & sde-lung-opacity-age-EODD & sde-lung-opacity-age-EOP \\
+    \textbf{Pleural Effusion} & baseline-pleural-effusion-age-EODD & baseline-pleural-effusion-age-EOP & unet-pleural-effusion-age-EODD & unet-pleural-effusion-age-EOP & pix2pix-pleural-effusion-age-EODD & pix2pix-pleural-effusion-age-EOP & sde-pleural-effusion-age-EODD & sde-pleural-effusion-age-EOP \\
+    \textbf{Pleural Other} & baseline-pleural-other-age-EODD & baseline-pleural-other-age-EOP & unet-pleural-other-age-EODD & unet-pleural-other-age-EOP & pix2pix-pleural-other-age-EODD & pix2pix-pleural-other-age-EOP & sde-pleural-other-age-EODD & sde-pleural-other-age-EOP \\
+    \textbf{Pneumonia} & baseline-pneumonia-age-EODD & baseline-pneumonia-age-EOP & unet-pneumonia-age-EODD & unet-pneumonia-age-EOP & pix2pix-pneumonia-age-EODD & pix2pix-pneumonia-age-EOP & sde-pneumonia-age-EODD & sde-pneumonia-age-EOP \\
+    \textbf{Pneumothorax} & baseline-pneumothorax-age-EODD & baseline-pneumothorax-age-EOP & unet-pneumothorax-age-EODD & unet-pneumothorax-age-EOP & pix2pix-pneumothorax-age-EODD & pix2pix-pneumothorax-age-EOP & sde-pneumothorax-age-EODD & sde-pneumothorax-age-EOP \\
+    \textbf{Average} & baseline-average-age-EODD & baseline-average-age-EOP & unet-average-age-EODD & unet-average-age-EOP & pix2pix-average-age-EODD & pix2pix-average-age-EOP & sde-average-age-EODD & sde-average-age-EOP \\ \hline
+    \end{tabular}
+    \end{table}
+    
+    \begin{table}[]
+        \centering
+        \caption{CheXpert classification fairness for gender}\label{tab:chex_gender}
+        \begin{tabular}{l|llllllll}
+        \hline
+        \multirow{2}{*}{\textbf{}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                           & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP} & \textbf{EODD} & \textbf{EOP} \\ \hline
+        \textbf{Atelectasis}  & baseline-atelectasis-gender-EODD & baseline-atelectasis-gender-EOP & unet-atelectasis-gender-EODD & unet-atelectasis-gender-EOP & pix2pix-atelectasis-gender-EODD & pix2pix-atelectasis-gender-EOP & sde-atelectasis-gender-EODD & sde-atelectasis-gender-EOP \\        
+        \textbf{Cardiomegaly} & baseline-cardiomegaly-gender-EODD & baseline-cardiomegaly-gender-EOP & unet-cardiomegaly-gender-EODD & unet-cardiomegaly-gender-EOP & pix2pix-cardiomegaly-gender-EODD & pix2pix-cardiomegaly-gender-EOP & sde-cardiomegaly-gender-EODD & sde-cardiomegaly-gender-EOP \\
+        \textbf{Consolidation} & baseline-consolidation-gender-EODD & baseline-consolidation-gender-EOP & unet-consolidation-gender-EODD & unet-consolidation-gender-EOP & pix2pix-consolidation-gender-EODD & pix2pix-consolidation-gender-EOP & sde-consolidation-gender-EODD & sde-consolidation-gender-EOP \\
+        \textbf{Edema} & baseline-edema-gender-EODD & baseline-edema-gender-EOP & unet-edema-gender-EODD & unet-edema-gender-EOP & pix2pix-edema-gender-EODD & pix2pix-edema-gender-EOP & sde-edema-gender-EODD & sde-edema-gender-EOP \\
+        \textbf{EC} & baseline-ec-gender-EODD & baseline-ec-gender-EOP & unet-ec-gender-EODD & unet-ec-gender-EOP & pix2pix-ec-gender-EODD & pix2pix-ec-gender-EOP & sde-ec-gender-EODD & sde-ec-gender-EOP \\
+        \textbf{Fracture} & baseline-fracture-gender-EODD & baseline-fracture-gender-EOP & unet-fracture-gender-EODD & unet-fracture-gender-EOP & pix2pix-fracture-gender-EODD & pix2pix-fracture-gender-EOP & sde-fracture-gender-EODD & sde-fracture-gender-EOP \\
+        \textbf{Lung Lesion} & baseline-lung-lesion-gender-EODD & baseline-lung-lesion-gender-EOP & unet-lung-lesion-gender-EODD & unet-lung-lesion-gender-EOP & pix2pix-lung-lesion-gender-EODD & pix2pix-lung-lesion-gender-EOP & sde-lung-lesion-gender-EODD & sde-lung-lesion-gender-EOP \\
+        \textbf{Lung Opacity} & baseline-lung-opacity-gender-EODD & baseline-lung-opacity-gender-EOP & unet-lung-opacity-gender-EODD & unet-lung-opacity-gender-EOP & pix2pix-lung-opacity-gender-EODD & pix2pix-lung-opacity-gender-EOP & sde-lung-opacity-gender-EODD & sde-lung-opacity-gender-EOP \\
+        \textbf{Pleural Effusion} & baseline-pleural-effusion-gender-EODD & baseline-pleural-effusion-gender-EOP & unet-pleural-effusion-gender-EODD & unet-pleural-effusion-gender-EOP & pix2pix-pleural-effusion-gender-EODD & pix2pix-pleural-effusion-gender-EOP & sde-pleural-effusion-gender-EODD & sde-pleural-effusion-gender-EOP \\
+        \textbf{Pleural Other} & baseline-pleural-other-gender-EODD & baseline-pleural-other-gender-EOP & unet-pleural-other-gender-EODD & unet-pleural-other-gender-EOP & pix2pix-pleural-other-gender-EODD & pix2pix-pleural-other-gender-EOP & sde-pleural-other-gender-EODD & sde-pleural-other-gender-EOP \\
+        \textbf{Pneumonia} & baseline-pneumonia-gender-EODD & baseline-pneumonia-gender-EOP & unet-pneumonia-gender-EODD & unet-pneumonia-gender-EOP & pix2pix-pneumonia-gender-EODD & pix2pix-pneumonia-gender-EOP & sde-pneumonia-gender-EODD & sde-pneumonia-gender-EOP \\
+        \textbf{Pneumothorax} & baseline-pneumothorax-gender-EODD & baseline-pneumothorax-gender-EOP & unet-pneumothorax-gender-EODD & unet-pneumothorax-gender-EOP & pix2pix-pneumothorax-gender-EODD & pix2pix-pneumothorax-gender-EOP & sde-pneumothorax-gender-EODD & sde-pneumothorax-gender-EOP \\
+        \textbf{Average} & baseline-average-gender-EODD & baseline-average-gender-EOP & unet-average-gender-EODD & unet-average-gender-EOP & pix2pix-average-gender-EODD & pix2pix-average-gender-EOP & sde-average-gender-EODD & sde-average-gender-EOP \\ \hline
+        \end{tabular}
+        \end{table}
+    
+    
+    \begin{table}[]
+        \centering
+        \caption{CheXpert classification fairness for ethnicity}\label{tab:chex_ethnicity}
+        \begin{tabular}{l|llllllll}
+        \hline
+        \multirow{2}{*}{\textbf{}} & \multicolumn{2}{c|}{\textbf{Baseline}}                   & \multicolumn{2}{c|}{\textbf{U-Net}}                              & \multicolumn{2}{c|}{\textbf{Pix2Pix}}                              & \multicolumn{2}{c}{\textbf{SDE}}    \\ \cline{2-9}
+                                                                                           & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP}  & \textbf{EODD} & \textbf{EOP} & \textbf{EODD} & \textbf{EOP} \\ \hline
+        \textbf{Atelectasis}  & baseline-atelectasis-ethnicity-EODD & baseline-atelectasis-ethnicity-EOP & unet-atelectasis-ethnicity-EODD & unet-atelectasis-ethnicity-EOP & pix2pix-atelectasis-ethnicity-EODD & pix2pix-atelectasis-ethnicity-EOP & sde-atelectasis-ethnicity-EODD & sde-atelectasis-ethnicity-EOP \\        
+        \textbf{Cardiomegaly} & baseline-cardiomegaly-ethnicity-EODD & baseline-cardiomegaly-ethnicity-EOP & unet-cardiomegaly-ethnicity-EODD & unet-cardiomegaly-ethnicity-EOP & pix2pix-cardiomegaly-ethnicity-EODD & pix2pix-cardiomegaly-ethnicity-EOP & sde-cardiomegaly-ethnicity-EODD & sde-cardiomegaly-ethnicity-EOP \\
+        \textbf{Consolidation} & baseline-consolidation-ethnicity-EODD & baseline-consolidation-ethnicity-EOP & unet-consolidation-ethnicity-EODD & unet-consolidation-ethnicity-EOP & pix2pix-consolidation-ethnicity-EODD & pix2pix-consolidation-ethnicity-EOP & sde-consolidation-ethnicity-EODD & sde-consolidation-ethnicity-EOP \\
+        \textbf{Edema} & baseline-edema-ethnicity-EODD & baseline-edema-ethnicity-EOP & unet-edema-ethnicity-EODD & unet-edema-ethnicity-EOP & pix2pix-edema-ethnicity-EODD & pix2pix-edema-ethnicity-EOP & sde-edema-ethnicity-EODD & sde-edema-ethnicity-EOP \\
+        \textbf{EC} & baseline-ec-ethnicity-EODD & baseline-ec-ethnicity-EOP & unet-ec-ethnicity-EODD & unet-ec-ethnicity-EOP & pix2pix-ec-ethnicity-EODD & pix2pix-ec-ethnicity-EOP & sde-ec-ethnicity-EODD & sde-ec-ethnicity-EOP \\
+        \textbf{Fracture} & baseline-fracture-ethnicity-EODD & baseline-fracture-ethnicity-EOP & unet-fracture-ethnicity-EODD & unet-fracture-ethnicity-EOP & pix2pix-fracture-ethnicity-EODD & pix2pix-fracture-ethnicity-EOP & sde-fracture-ethnicity-EODD & sde-fracture-ethnicity-EOP \\
+        \textbf{Lung Lesion} & baseline-lung-lesion-ethnicity-EODD & baseline-lung-lesion-ethnicity-EOP & unet-lung-lesion-ethnicity-EODD & unet-lung-lesion-ethnicity-EOP & pix2pix-lung-lesion-ethnicity-EODD & pix2pix-lung-lesion-ethnicity-EOP & sde-lung-lesion-ethnicity-EODD & sde-lung-lesion-ethnicity-EOP \\
+        \textbf{Lung Opacity} & baseline-lung-opacity-ethnicity-EODD & baseline-lung-opacity-ethnicity-EOP & unet-lung-opacity-ethnicity-EODD & unet-lung-opacity-ethnicity-EOP & pix2pix-lung-opacity-ethnicity-EODD & pix2pix-lung-opacity-ethnicity-EOP & sde-lung-opacity-ethnicity-EODD & sde-lung-opacity-ethnicity-EOP \\
+        \textbf{Pleural Effusion} & baseline-pleural-effusion-ethnicity-EODD & baseline-pleural-effusion-ethnicity-EOP & unet-pleural-effusion-ethnicity-EODD & unet-pleural-effusion-ethnicity-EOP & pix2pix-pleural-effusion-ethnicity-EODD & pix2pix-pleural-effusion-ethnicity-EOP & sde-pleural-effusion-ethnicity-EODD & sde-pleural-effusion-ethnicity-EOP \\
+        \textbf{Pleural Other} & baseline-pleural-other-ethnicity-EODD & baseline-pleural-other-ethnicity-EOP & unet-pleural-other-ethnicity-EODD & unet-pleural-other-ethnicity-EOP & pix2pix-pleural-other-ethnicity-EODD & pix2pix-pleural-other-ethnicity-EOP & sde-pleural-other-ethnicity-EODD & sde-pleural-other-ethnicity-EOP \\
+        \textbf{Pneumonia} & baseline-pneumonia-ethnicity-EODD & baseline-pneumonia-ethnicity-EOP & unet-pneumonia-ethnicity-EODD & unet-pneumonia-ethnicity-EOP & pix2pix-pneumonia-ethnicity-EODD & pix2pix-pneumonia-ethnicity-EOP & sde-pneumonia-ethnicity-EODD & sde-pneumonia-ethnicity-EOP \\
+        \textbf{Pneumothorax} & baseline-pneumothorax-ethnicity-EODD & baseline-pneumothorax-ethnicity-EOP & unet-pneumothorax-ethnicity-EODD & unet-pneumothorax-ethnicity-EOP & pix2pix-pneumothorax-ethnicity-EODD & pix2pix-pneumothorax-ethnicity-EOP & sde-pneumothorax-ethnicity-EODD & sde-pneumothorax-ethnicity-EOP \\
+        \textbf{Average} & baseline-average-ethnicity-EODD & baseline-average-ethnicity-EOP & unet-average-ethnicity-EODD & unet-average-ethnicity-EOP & pix2pix-average-ethnicity-EODD & pix2pix-average-ethnicity-EOP & sde-average-ethnicity-EODD & sde-average-ethnicity-EOP \\ \hline
+        \end{tabular}
+        \end{table}

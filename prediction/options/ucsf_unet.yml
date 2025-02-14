@@ -1,4 +1,4 @@
-name: ucsf_unet_8
+name: ucsf_unet_8_fairness
 results_path: /lotterlab/users/matteo/predictions
 batch_size: 8
 num_workers: 2
@@ -17,7 +17,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/Unet/unet-8_20250106_102815/checkpoints/unet-8_20250106_102815_epoch_11_best.pth
+  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-ucsf-08-001_20250213_135512/checkpoints/unet-fairness-ucsf-08-001_20250213_135512_epoch_19_best.pth
 
 task_models: 
   name: ucsf

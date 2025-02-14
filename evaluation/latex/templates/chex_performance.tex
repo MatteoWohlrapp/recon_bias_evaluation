@@ -1,0 +1,53 @@
+\begin{table}[]
+\centering
+\caption{CheXpert image metrics and prediction performance when applied to the reconstructed images. Baseline is the prediction on the ground truth images; EC: Enlarged Cardiomediastinum}\label{tab:chex_perf}
+\begin{tabular}{cll|llll}
+\hline
+\multicolumn{1}{l}{\textbf{Photon Count}} & \multicolumn{2}{c|}{\textbf{Metrics}}         & \textbf{Baseline} & \textbf{U-Net} & \textbf{Pix2Pix} & \textbf{SDE} \\ \hline
+\multirow{15}{*}{100,000}               & \multirow{13}{*}{\textbf{AUROC}} & \textbf{Atalectasis}  & 100000-baseline-atelectasis & 100000-unet-atelectasis & 100000-pix2pix-atelectasis & 100000-sde-atelectasis \\
+                                 &                        & \textbf{Cardiomegaly} & 100000-baseline-cardiomegaly & 100000-unet-cardiomegaly & 100000-pix2pix-cardiomegaly & 100000-sde-cardiomegaly \\
+                                 &                        & \textbf{Consolidation} & 100000-baseline-consolidation & 100000-unet-consolidation & 100000-pix2pix-consolidation & 100000-sde-consolidation \\ 
+                                 &                        & \textbf{Edema} & 100000-baseline-edema & 100000-unet-edema & 100000-pix2pix-edema & 100000-sde-edema \\ 
+                                 &                        & \textbf{EC} & 100000-baseline-ec & 100000-unet-ec & 100000-pix2pix-ec & 100000-sde-ec \\ 
+                                 &                        & \textbf{Fracture} & 100000-baseline-fracture & 100000-unet-fracture & 100000-pix2pix-fracture & 100000-sde-fracture \\ 
+                                 &                        & \textbf{Lung Lesion} & 100000-baseline-lung-lesion & 100000-unet-lung-lesion & 100000-pix2pix-lung-lesion & 100000-sde-lung-lesion \\ 
+                                 &                        & \textbf{Lung Opacity} & 100000-baseline-lung-opacity & 100000-unet-lung-opacity & 100000-pix2pix-lung-opacity & 100000-sde-lung-opacity \\ 
+                                 &                        & \textbf{Pleural Effusion} & 100000-baseline-pleural-effusion & 100000-unet-pleural-effusion & 100000-pix2pix-pleural-effusion & 100000-sde-pleural-effusion \\ 
+                                 &                        & \textbf{Pleural Other} & 100000-baseline-pleural-other & 100000-unet-pleural-other & 100000-pix2pix-pleural-other & 100000-sde-pleural-other \\ 
+                                 &                        & \textbf{Pneumonia} & 100000-baseline-pneumonia & 100000-unet-pneumonia & 100000-pix2pix-pneumonia & 100000-sde-pneumonia \\ 
+                                 &                        & \textbf{Pneumothorax} & 100000-baseline-pneumothorax & 100000-unet-pneumothorax & 100000-pix2pix-pneumothorax & 100000-sde-pneumothorax \\
+                                 &                        & \textbf{Average} & 100000-baseline-average & 100000-unet-average & 100000-pix2pix-average & 100000-sde-average \\ \cline{2-3}
+                                 & \multicolumn{2}{l|}{\textbf{PSNR}}            & \cellcolor[HTML]{C0C0C0} & 100000-unet-psnr & 100000-pix2pix-psnr & 100000-sde-psnr \\
+                                 & \multicolumn{2}{l|}{\textbf{LPIPS}}           & \cellcolor[HTML]{C0C0C0} & 100000-unet-lpips & 100000-pix2pix-lpips & 100000-sde-lpips \\ \hline
+\multirow{15}{*}{10,000}               & \multirow{13}{*}{\textbf{AUROC}} & \textbf{Atalectasis}  & 10000-baseline-atelectasis & 10000-unet-atelectasis & 10000-pix2pix-atelectasis & 10000-sde-atelectasis \\
+                                 &                        & \textbf{Cardiomegaly} & 10000-baseline-cardiomegaly & 10000-unet-cardiomegaly & 10000-pix2pix-cardiomegaly & 10000-sde-cardiomegaly \\
+                                 &                        & \textbf{Consolidation} & 10000-baseline-consolidation & 10000-unet-consolidation & 10000-pix2pix-consolidation & 10000-sde-consolidation \\ 
+                                 &                        & \textbf{Edema} & 10000-baseline-edema & 10000-unet-edema & 10000-pix2pix-edema & 10000-sde-edema \\ 
+                                 &                        & \textbf{EC} & 10000-baseline-ec & 10000-unet-ec & 10000-pix2pix-ec & 10000-sde-ec \\ 
+                                 &                        & \textbf{Fracture} & 10000-baseline-fracture & 10000-unet-fracture & 10000-pix2pix-fracture & 10000-sde-fracture \\ 
+                                 &                        & \textbf{Lung Lesion} & 10000-baseline-lung-lesion & 10000-unet-lung-lesion & 10000-pix2pix-lung-lesion & 10000-sde-lung-lesion \\ 
+                                 &                        & \textbf{Lung Opacity} & 10000-baseline-lung-opacity & 10000-unet-lung-opacity & 10000-pix2pix-lung-opacity & 10000-sde-lung-opacity \\ 
+                                 &                        & \textbf{Pleural Effusion} & 10000-baseline-pleural-effusion & 10000-unet-pleural-effusion & 10000-pix2pix-pleural-effusion & 10000-sde-pleural-effusion \\ 
+                                 &                        & \textbf{Pleural Other} & 10000-baseline-pleural-other & 10000-unet-pleural-other & 10000-pix2pix-pleural-other & 10000-sde-pleural-other \\ 
+                                 &                        & \textbf{Pneumonia} & 10000-baseline-pneumonia & 10000-unet-pneumonia & 10000-pix2pix-pneumonia & 10000-sde-pneumonia \\ 
+                                 &                        & \textbf{Pneumothorax} & 10000-baseline-pneumothorax & 10000-unet-pneumothorax & 10000-pix2pix-pneumothorax & 10000-sde-pneumothorax \\
+                                 &                        & \textbf{Average} & 10000-baseline-average & 10000-unet-average & 10000-pix2pix-average & 10000-sde-average \\ \cline{2-3}
+                                 & \multicolumn{2}{l|}{\textbf{PSNR}}            & \cellcolor[HTML]{C0C0C0} & 10000-unet-psnr & 10000-pix2pix-psnr & 10000-sde-psnr \\
+                                 & \multicolumn{2}{l|}{\textbf{LPIPS}}           & \cellcolor[HTML]{C0C0C0} & 10000-unet-lpips & 10000-pix2pix-lpips & 10000-sde-lpips \\ \hline
+\multirow{15}{*}{3000}               & \multirow{13}{*}{\textbf{AUROC}} & \textbf{Atalectasis}  & 3000-baseline-atelectasis & 3000-unet-atelectasis & 3000-pix2pix-atelectasis & 3000-sde-atelectasis \\
+                                 &                        & \textbf{Cardiomegaly} & 3000-baseline-cardiomegaly & 3000-unet-cardiomegaly & 3000-pix2pix-cardiomegaly & 3000-sde-cardiomegaly \\
+                                 &                        & \textbf{Consolidation} & 3000-baseline-consolidation & 3000-unet-consolidation & 3000-pix2pix-consolidation & 3000-sde-consolidation \\ 
+                                 &                        & \textbf{Edema} & 3000-baseline-edema & 3000-unet-edema & 3000-pix2pix-edema & 3000-sde-edema \\ 
+                                 &                        & \textbf{EC} & 3000-baseline-ec & 3000-unet-ec & 3000-pix2pix-ec & 3000-sde-ec \\ 
+                                 &                        & \textbf{Fracture} & 3000-baseline-fracture & 3000-unet-fracture & 3000-pix2pix-fracture & 3000-sde-fracture \\ 
+                                 &                        & \textbf{Lung Lesion} & 3000-baseline-lung-lesion & 3000-unet-lung-lesion & 3000-pix2pix-lung-lesion & 3000-sde-lung-lesion \\ 
+                                 &                        & \textbf{Lung Opacity} & 3000-baseline-lung-opacity & 3000-unet-lung-opacity & 3000-pix2pix-lung-opacity & 3000-sde-lung-opacity \\ 
+                                 &                        & \textbf{Pleural Effusion} & 3000-baseline-pleural-effusion & 3000-unet-pleural-effusion & 3000-pix2pix-pleural-effusion & 3000-sde-pleural-effusion \\ 
+                                 &                        & \textbf{Pleural Other} & 3000-baseline-pleural-other & 3000-unet-pleural-other & 3000-pix2pix-pleural-other & 3000-sde-pleural-other \\ 
+                                 &                        & \textbf{Pneumonia} & 3000-baseline-pneumonia & 3000-unet-pneumonia & 3000-pix2pix-pneumonia & 3000-sde-pneumonia \\ 
+                                 &                        & \textbf{Pneumothorax} & 3000-baseline-pneumothorax & 3000-unet-pneumothorax & 3000-pix2pix-pneumothorax & 3000-sde-pneumothorax \\
+                                 &                        & \textbf{Average} & 3000-baseline-average & 3000-unet-average & 3000-pix2pix-average & 3000-sde-average \\ \cline{2-3}
+                                 & \multicolumn{2}{l|}{\textbf{PSNR}}            & \cellcolor[HTML]{C0C0C0} & 3000-unet-psnr & 3000-pix2pix-psnr & 3000-sde-psnr \\
+                                 & \multicolumn{2}{l|}{\textbf{LPIPS}}           & \cellcolor[HTML]{C0C0C0} & 3000-unet-lpips & 3000-pix2pix-lpips & 3000-sde-lpips \\ \hline
+\end{tabular}
+\end{table}
