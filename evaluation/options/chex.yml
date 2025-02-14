@@ -1,10 +1,10 @@
 
-name: chex-evaluation-test-plots
+name: chex-evaluation
 results_path: /lotterlab/users/matteo/evaluations
 
 dataset: chex
 
-fairness_path: /lotterlab/users/matteo/evaluations/chex-evaluation-fairness-csvs_20250213_190215/chex-evaluation-fairness-csvs_fairness_results.csv
+fairness_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250214_163703/chex-evaluation_fairness_results.csv
 
 predictions: 
     - photon_count: 100000

@@ -161,6 +161,8 @@ def bootstrap_fairness(
     results = {
         "eodd_class": observed_eodd_class,
         "eodd_recon": observed_eodd_recon,
+        "eop_class": observed_eop_class,
+        "eop_recon": observed_eop_recon,
         "delta_eodd": observed_delta_eodd,
         "delta_eop": observed_delta_eop,
         "delta_eodd_p_value": p_value_eodd,
@@ -176,7 +178,7 @@ def get_tpr(y_pred, y):
     # calculate true positive rate
     y_pred = y_pred.astype(int)
     y = y.astype(int)
-    if y.sum() == 0:  
+    if y.sum() == 0:
         return 1
     tpr = y_pred[y == 1].sum() / y.sum()
     return tpr
@@ -187,7 +189,7 @@ def get_fpr(y_pred, y):
     y_pred = y_pred.astype(int)
     y = y.astype(int)
     n_neg = len(y) - y.sum()
-    if n_neg == 0: 
+    if n_neg == 0:
         return 0.0
     fpr = y_pred[y == 0].sum() / n_neg
     return fpr
@@ -536,6 +538,7 @@ def fairness_prediction(predictions, fairness_path):
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
+
 def bootstrap_psnr_difference(
     interpreter_results,
     attribute,
@@ -577,7 +580,9 @@ def bootstrap_psnr_difference(
             n=len(interpreter_results), replace=True
         )
         for val in attribute_values:
-            subgroup = boot_interpreter_results[boot_interpreter_results[attribute] == val]
+            subgroup = boot_interpreter_results[
+                boot_interpreter_results[attribute] == val
+            ]
             boot_psnr_values.append(subgroup[f"{interpreter_name}"].mean())
 
         boot_diffs.append(boot_psnr_values[max_index] - boot_psnr_values[min_index])
@@ -598,6 +603,7 @@ def bootstrap_psnr_difference(
         "delta_psnr_percent": (observed_diff / min_psnr) * 100,
     }
     return results
+
 
 def psnr_difference_prediction(predictions):
     sensitive_attributes = {
@@ -631,7 +637,7 @@ def psnr_difference_prediction(predictions):
                 attribute_values,
                 attribute_name,
             ) in sensitive_attributes.items():
-                
+
                 results = bootstrap_psnr_difference(
                     prediction_results,
                     attribute,
@@ -815,14 +821,18 @@ def evaluate_chex(config, results_dir, name):
             }
         )
 
-    #print("Evaluating performance")
-    #performance_results = performance_prediction(predictions)
-    #performance_results.to_csv(results_dir / f'{name}_performance_results.csv', index=False)
-    #plot_chex_performance(performance_results, results_dir, name)
+    print("Evaluating performance")
+    performance_results = performance_prediction(predictions)
+    performance_results.to_csv(
+        results_dir / f"{name}_performance_results.csv", index=False
+    )
+    plot_chex_performance(performance_results, results_dir, name)
 
-    #print("Evaluating psnr difference")
-    #psnr_difference = psnr_difference_prediction(predictions)
-    #psnr_difference.to_csv(results_dir / f"{name}_psnr_difference_results.csv", index=False)
+    print("Evaluating psnr difference")
+    psnr_difference = psnr_difference_prediction(predictions)
+    psnr_difference.to_csv(
+        results_dir / f"{name}_psnr_difference_results.csv", index=False
+    )
 
     print("Evaluating fairness")
     fairness_path = config["fairness_path"] if "fairness_path" in config else None

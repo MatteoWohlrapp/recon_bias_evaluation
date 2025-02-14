@@ -4,6 +4,10 @@ import numpy as np
 from plot_ucsf import plot_ucsf_performance, plot_ucsf_additional_bias
 
 
+def bootstrap_fairness(predictions, metric, attribute):
+    pass
+
+
 def get_tpr(y_pred, y):
     # calculate true positive rate
     y_pred = y_pred.astype(int)
@@ -357,6 +361,10 @@ def fairness_prediction_segmentation(predictions):
 
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
+
+
+def psnr_difference_prediction(predictions):
+    pass
 
 
 def performance_prediction(predictions):

@@ -324,10 +324,16 @@ def plot_chex_additional_bias(results, results_dir, name):
 
         plot_data = pd.concat(plot_data)
 
+        # Calculate y limits with more padding for error bars
         y_min = plot_data["value"].min()
         y_max = plot_data["value"].max()
-        y_min = np.floor(y_min / 0.05) * 0.05
-        y_max = np.ceil(y_max / 0.05) * 0.05
+
+        # Add padding for error bars by including the standard errors
+        std_err_max = plot_data[plot_data["metric"].str.contains("std-err", na=False)][
+            "value"
+        ].max()
+        y_min = np.floor((y_min - std_err_max) / 0.05) * 0.05  # Add padding below
+        y_max = np.ceil((y_max + std_err_max) / 0.05) * 0.05  # Add padding above
 
         g = sns.FacetGrid(
             plot_data,
@@ -472,6 +478,7 @@ def plot_chex_additional_bias(results, results_dir, name):
         )
     plt.close()
 
+
 def plot_chex_additonal_bias_summary(results, results_dir, name):
     latex_path = "latex/templates/chex_fairness_colors.tex"
 
@@ -572,7 +579,9 @@ def plot_chex_additonal_bias_summary(results, results_dir, name):
 
                     # Add color if significant
                     if color:
-                        formatted_value = f"\\cellcolor[HTML]{{{color}}}{formatted_value}"
+                        formatted_value = (
+                            f"\\cellcolor[HTML]{{{color}}}{formatted_value}"
+                        )
 
                     # Replace the key in the latex content
                     current_content = current_content.replace(key, formatted_value)
