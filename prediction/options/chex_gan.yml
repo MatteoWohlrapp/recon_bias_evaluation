@@ -1,11 +1,11 @@
-name: chex_gan_100000
-results_path: /lotterlab/users/matteo/predictions
+name: chex_gan_10000_fairness_200
+results_path: /lotterlab/users/matteo/predictions_fairness
 batch_size: 16
 num_workers: 4
 
 datasets:
   name: chex
-  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_100000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
@@ -14,7 +14,7 @@ datasets:
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/models/Noise/Chex/GAN/100000/pix2pix-chex100000-128-l1000-e200.pth
+  model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/pix2pix-chex10000-128-l1000-10-fairness/200_net_G.pth
 
 task_models: 
   name: chexpert-classifier

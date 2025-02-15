@@ -310,7 +310,23 @@ def plot_chex_additional_bias(results, results_dir, name):
 
         # Modify how we prepare plot_data to include std err metrics
         plot_data = []
+        max_std_err = 0
+        min_std_err = 0
         for metric in interpreter_configs["metrics"]:
+
+            for _, row in data_task.iterrows():
+                if row["metric"] == metric:
+                    if row["value"] > 0:
+                        for _, row_std_err in data_task.iterrows():
+                            if row_std_err["metric"] == f"{metric}-std-err":
+                                if row_std_err["value"] > max_std_err:
+                                    max_std_err = row_std_err["value"]
+                    else:
+                        for _, row_std_err in data_task.iterrows():
+                            if row_std_err["metric"] == f"{metric}-std-err":
+                                if row_std_err["value"] > min_std_err:
+                                    min_std_err = row_std_err["value"]
+
             metric_data = data_task[
                 data_task["metric"].isin([metric, f"{metric}-std-err"])
             ].copy()
@@ -329,11 +345,15 @@ def plot_chex_additional_bias(results, results_dir, name):
         y_max = plot_data["value"].max()
 
         # Add padding for error bars by including the standard errors
-        std_err_max = plot_data[plot_data["metric"].str.contains("std-err", na=False)][
+        """std_err_max = plot_data[plot_data["metric"].str.contains("std-err", na=False)][
             "value"
         ].max()
         y_min = np.floor((y_min - std_err_max) / 0.05) * 0.05  # Add padding below
-        y_max = np.ceil((y_max + std_err_max) / 0.05) * 0.05  # Add padding above
+        #y_max = np.ceil((y_max + std_err_max) / 0.05) * 0.05  # Add padding above
+        y_max = y_max + std_err_max"""
+
+        y_min = np.floor((y_min - min_std_err) / 0.05) * 0.05
+        y_max = np.ceil((y_max + max_std_err) / 0.05) * 0.05
 
         g = sns.FacetGrid(
             plot_data,

@@ -1,5 +1,5 @@
-name: ucsf_gan_4
-results_path: /lotterlab/users/matteo/predictions
+name: ucsf_gan_8_fairness_200
+results_path: /lotterlab/users/matteo/predictions_fairness
 batch_size: 16
 num_workers: 4
 
@@ -13,11 +13,11 @@ datasets:
   lower_slice: 60
   upper_slice: 130
   split: test
-  num_rays: 140
+  num_rays: 60
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-4/200_net_G.pth
+  model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/ucsf-08-l1000-fairness-10/200_net_G.pth
 
 task_models: 
   name: ucsf
