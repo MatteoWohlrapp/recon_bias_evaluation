@@ -1,5 +1,6 @@
 
-name: ucsf-evaluation
+name: ucsf-evaluation-test
+
 results_path: /lotterlab/users/matteo/evaluations
 
 dataset: ucsf

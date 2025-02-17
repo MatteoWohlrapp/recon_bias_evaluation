@@ -1,0 +1,19 @@
+
+name: ucsf-evaluation-fairness-unet-8
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: ucsf
+
+predictions: 
+    - acceleration: 8
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions_fairness/ucsf_unet_8_fairness_19_20250213_182834/ucsf_unet_8_fairness_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions_fairness/ucsf_gan_8_fairness_200_20250215_104739/ucsf_gan_8_fairness_200_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions_fairness/ucsf_diffusion_8_fairness_160_20250215_104949/ucsf_diffusion_8_fairness_160_results.csv'
+      fairness: True

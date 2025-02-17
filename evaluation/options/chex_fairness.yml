@@ -1,0 +1,21 @@
+
+name: chex-evaluation_unet_fairness_01_16
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: chex
+
+#fairness_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250214_163703/chex-evaluation_fairness_results.csv
+
+predictions: 
+    - photon_count: 10000
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions_fairness/chex_unet_10000_fairness_01_19_20250216_115553/chex_unet_10000_fairness_01_19_results.csv'
+      fairness: True
+    - photon_count: 10000
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions_fairness/chex_gan_10000_fairness_100_20250215_105531/chex_gan_10000_fairness_100_results.csv'
+      fairness: True
+    - photon_count: 10000
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions/chex_diffusion_10000_20250204_210108/chex_diffusion_10000_results.csv'
+      fairness: True

@@ -29,10 +29,10 @@ def plot_ucsf_performance(results, results_dir, name):
     plt.rcParams.update(
         {
             "font.size": 24,
-            "axes.titlesize": 24,
-            "axes.labelsize": 24,
-            "xtick.labelsize": 24,
-            "ytick.labelsize": 24,
+            "axes.titlesize": 28,
+            "axes.labelsize": 20,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
             "legend.fontsize": 24,
             "legend.title_fontsize": 24,
             "lines.linewidth": 2.5,
@@ -80,10 +80,18 @@ def plot_ucsf_performance(results, results_dir, name):
             linewidth=2.5,
         )
 
-        # Set labels and title
-        ax1.set_xlabel("Acceleration Factor")
-        ax1.set_ylabel(metric_labels[metric1])
-        ax2.set_ylabel(metric_labels[metric2])
+        # Set labels and title with bold font
+        ax1.set_xlabel("Acceleration Factor", fontweight="bold")
+        ax1.set_ylabel(metric_labels[metric1], fontweight="bold")
+        ax2.set_ylabel(metric_labels[metric2], fontweight="bold")
+
+        # Make tick labels bold
+        ax1.tick_params(axis="both", which="major")
+        ax2.tick_params(axis="both", which="major")
+
+        # Remove legends from plot
+        ax1.get_legend().remove()
+        ax2.get_legend().remove()
 
         # Get lines and labels for both plots
         lines1, labels1 = ax1.get_legend_handles_labels()
@@ -111,16 +119,6 @@ def plot_ucsf_performance(results, results_dir, name):
                 markersize=8,
             ),
         ]
-
-        # Create combined legend with both models and line styles
-        ax1.legend(
-            lines1[:3] + custom_lines,
-            [model_labels[model] for model in labels1[:3]]
-            + [f"{metric_labels[metric1]}"]
-            + [f"{metric_labels[metric2]}"],
-            bbox_to_anchor=(1.15, 1),
-        )
-        ax2.get_legend().remove()
 
         # Set x-axis to treat values as categorical
         available_accelerations = sorted(data1["acceleration"].unique())
@@ -184,6 +182,41 @@ def plot_ucsf_performance(results, results_dir, name):
                 format=fmt,
             )
         plt.close()
+
+    # Create a separate legend figure
+    plt.figure(figsize=(12, 1))
+    ax = plt.gca()
+    ax.set_axis_off()
+
+    # Create legend elements
+    model_lines = [
+        Line2D([0], [0], color=color, label=model_labels[model])
+        for model, color in model_colors.items()
+    ]
+    metric_lines = [
+        Line2D([0], [0], color="gray", linestyle="-", marker="o", label=metric_labels[metric1]),
+        Line2D([0], [0], color="gray", linestyle="--", marker="s", label=metric_labels[metric2]),
+    ]
+
+    # Create horizontal legend
+    plt.legend(
+        handles=model_lines + metric_lines,
+        loc="center",
+        ncol=len(model_lines) + len(metric_lines),
+        bbox_to_anchor=(0.5, 0.5),
+    )
+
+    # Save legend
+    for fmt in ["eps", "pdf", "png"]:
+        save_dir = os.path.join(results_dir, "ucsf_performance", fmt)
+        os.makedirs(save_dir, exist_ok=True)
+        plt.savefig(
+            f"{save_dir}/{name}_performance_legend.{fmt}",
+            bbox_inches="tight",
+            dpi=300,
+            format=fmt,
+        )
+    plt.close()
 
 
 def plot_ucsf_additional_bias(results, results_dir, name):

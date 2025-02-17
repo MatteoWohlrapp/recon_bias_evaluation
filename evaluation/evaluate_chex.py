@@ -828,11 +828,11 @@ def evaluate_chex(config, results_dir, name):
     )
     plot_chex_performance(performance_results, results_dir, name)
 
-    print("Evaluating psnr difference")
+    """print("Evaluating psnr difference")
     psnr_difference = psnr_difference_prediction(predictions)
     psnr_difference.to_csv(
         results_dir / f"{name}_psnr_difference_results.csv", index=False
-    )
+    )"""
 
     print("Evaluating fairness")
     fairness_path = config["fairness_path"] if "fairness_path" in config else None

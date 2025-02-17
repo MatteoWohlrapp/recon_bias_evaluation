@@ -344,14 +344,6 @@ def plot_chex_additional_bias(results, results_dir, name):
         y_min = plot_data["value"].min()
         y_max = plot_data["value"].max()
 
-        # Add padding for error bars by including the standard errors
-        """std_err_max = plot_data[plot_data["metric"].str.contains("std-err", na=False)][
-            "value"
-        ].max()
-        y_min = np.floor((y_min - std_err_max) / 0.05) * 0.05  # Add padding below
-        #y_max = np.ceil((y_max + std_err_max) / 0.05) * 0.05  # Add padding above
-        y_max = y_max + std_err_max"""
-
         y_min = np.floor((y_min - min_std_err) / 0.05) * 0.05
         y_max = np.ceil((y_max + max_std_err) / 0.05) * 0.05
 
