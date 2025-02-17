@@ -1,15 +1,22 @@
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 import numpy as np
-from plot_ucsf import plot_ucsf_performance, plot_ucsf_additional_bias
+from plot_ucsf import (
+    plot_ucsf_performance,
+    plot_ucsf_additional_bias,
+    plot_ucsf_additional_bias_summary_classifier,
+    plot_ucsf_additional_bias_summary_segmentation,
+)
 
 
-def bootstrap_fairness_classifier(interpreter_results,
+def bootstrap_fairness_classifier(
+    interpreter_results,
     attribute,
     attribute_values,
     interpreter_name,
     gt_name,
-    n_iterations=1000,):
+    n_iterations=1000,
+):
     tpr_class = []
     fpr_class = []
     tpr_recon = []
@@ -19,25 +26,13 @@ def bootstrap_fairness_classifier(interpreter_results,
         subgroup = interpreter_results[interpreter_results[attribute] == val]
         if len(subgroup) == 0:
             continue
-        tpr_class.append(
-            get_tpr(
-                subgroup[f"{interpreter_name}"], subgroup[gt_name]
-            )
-        )
-        fpr_class.append(
-            get_fpr(
-                subgroup[f"{interpreter_name}"], subgroup[gt_name]
-            )
-        )
+        tpr_class.append(get_tpr(subgroup[f"{interpreter_name}"], subgroup[gt_name]))
+        fpr_class.append(get_fpr(subgroup[f"{interpreter_name}"], subgroup[gt_name]))
         tpr_recon.append(
-            get_tpr(
-                subgroup[f"{interpreter_name}_recon"], subgroup[gt_name]
-            )
+            get_tpr(subgroup[f"{interpreter_name}_recon"], subgroup[gt_name])
         )
         fpr_recon.append(
-            get_fpr(
-                subgroup[f"{interpreter_name}_recon"], subgroup[gt_name]
-            )
+            get_fpr(subgroup[f"{interpreter_name}_recon"], subgroup[gt_name])
         )
 
     # Compute EODD for baseline and recon:
@@ -139,7 +134,9 @@ def bootstrap_fairness_classifier(interpreter_results,
         "eop_class": observed_eop_class,
         "eop_recon": observed_eop_recon,
         "delta_eodd": observed_delta_eodd,
+        "delta_eodd_bootstrapped": boot_deltas_eodd.mean(),
         "delta_eop": observed_delta_eop,
+        "delta_eop_bootstrapped": boot_deltas_eop.mean(),
         "delta_eodd_p_value": p_value_eodd,
         "delta_eop_p_value": p_value_eop,
         "delta_eodd_std": std_eodd_delta,
@@ -347,15 +344,31 @@ def fairness_prediction_classifier(predictions):
                             "value": results["delta_eop_std"],
                         }
                     )
-
-
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-bootstrapped",
+                            "value": results["delta_eodd_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-bootstrapped",
+                            "value": results["delta_eop_bootstrapped"],
+                        }
+                    )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
-def bootstrap_fairness_segmentation(interpreter_results,
-    attribute,
-    attribute_values,
-    n_iterations=1000):
+
+def bootstrap_fairness_segmentation(
+    interpreter_results, attribute, attribute_values, n_iterations=1000
+):
 
     dice_class = []
     dice_recon = []
@@ -367,7 +380,7 @@ def bootstrap_fairness_segmentation(interpreter_results,
 
     delta_dice_class = max(dice_class) - min(dice_class)
     delta_dice_recon = max(dice_recon) - min(dice_recon)
-    
+
     ser_class = (1 - min(dice_class)) / (1 - max(dice_class))
     ser_recon = (1 - min(dice_recon)) / (1 - max(dice_recon))
 
@@ -376,7 +389,7 @@ def bootstrap_fairness_segmentation(interpreter_results,
 
     boot_delta_delta_dice = []
     boot_delta_ser = []
-    
+
     for i in range(n_iterations):
         dice_class = []
         dice_recon = []
@@ -386,7 +399,9 @@ def bootstrap_fairness_segmentation(interpreter_results,
         )
 
         for val in attribute_values:
-            subgroup = boot_interpreter_results[boot_interpreter_results[attribute] == val]
+            subgroup = boot_interpreter_results[
+                boot_interpreter_results[attribute] == val
+            ]
             dice_class.append(subgroup["UNet_dice"].mean())
             dice_recon.append(subgroup["UNet_recon_dice"].mean())
 
@@ -401,7 +416,7 @@ def bootstrap_fairness_segmentation(interpreter_results,
 
     boot_delta_delta_dice = np.array(boot_delta_delta_dice)
     boot_delta_ser = np.array(boot_delta_ser)
-    
+
     if observed_delta_delta_dice >= 0:
         p_value_delta_delta_dice = np.mean(boot_delta_delta_dice <= 0)
     else:
@@ -422,12 +437,15 @@ def bootstrap_fairness_segmentation(interpreter_results,
         "ser_recon": ser_recon,
         "delta_delta_dice": observed_delta_delta_dice,
         "delta_ser": observed_delta_ser,
+        "delta_delta_dice_bootstrapped": boot_delta_delta_dice.mean(),
+        "delta_ser_bootstrapped": boot_delta_ser.mean(),
         "delta_delta_dice_p_value": p_value_delta_delta_dice,
         "delta_ser_p_value": p_value_delta_ser,
         "delta_delta_dice_std": std_delta_delta_dice,
         "delta_ser_std": std_delta_ser,
     }
     return results
+
 
 def fairness_prediction_segmentation(predictions):
     predictions = predictions.copy()  # Make a shallow copy of the list
@@ -444,125 +462,150 @@ def fairness_prediction_segmentation(predictions):
             "model": prediction["model"],
             "acceleration": prediction["acceleration"],
             "prediction_results": prediction["prediction_results"].copy(),
+            "fairness": prediction["fairness"],
         }
-        original_model = prediction["model"]
-        prediction_results = prediction["prediction_results"]
-        prediction_results["age_bin"] = prediction_results["age"].apply(
-            lambda x: "Y" if float(str(x).split("(")[1].split(",")[0]) <= 58 else "O"
-        )
-        prediction_results["sex"] = prediction_results["sex"].apply(
-            lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
-        )
-
-        # Get patient-level predictions and include sensitive attributes in the groupby
-        patient_preds = prediction_results.groupby("patient_id").agg(
-            {"UNet_dice": "mean", "UNet_recon_dice": "mean","sex": "first", "age_bin": "first"}
-        )
-
-        for attribute, (
-            attribute_values,
-            attribute_name,
-        ) in sensitive_attributes.items():
-
-            results = bootstrap_fairness_segmentation(
-                patient_preds,
-                attribute,
-                attribute_values
+        if prediction["fairness"]:
+            original_model = prediction["model"]
+            prediction_results = prediction["prediction_results"]
+            prediction_results["age_bin"] = prediction_results["age"].apply(
+                lambda x: (
+                    "Y" if float(str(x).split("(")[1].split(",")[0]) <= 58 else "O"
+                )
+            )
+            prediction_results["sex"] = prediction_results["sex"].apply(
+                lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
             )
 
-            all_results.append(
+            # Get patient-level predictions and include sensitive attributes in the groupby
+            patient_preds = prediction_results.groupby("patient_id").agg(
                 {
-                    "model": "baseline",
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "SER",
-                    "value": results["ser_class"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "SER",
-                    "value": results["ser_recon"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": "baseline",
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-dice",
-                    "value": results["delta_dice_class"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-dice",
-                    "value": results["delta_dice_recon"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-SER",
-                    "value": results["delta_ser"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-delta-dice",
-                    "value": results["delta_delta_dice"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-SER-p-value",
-                    "value": results["delta_ser_p_value"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-delta-dice-p-value",
-                    "value": results["delta_delta_dice_p_value"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-delta-dice-std",
-                    "value": results["delta_delta_dice_std"],
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-SER-std",
-                    "value": results["delta_ser_std"],
+                    "UNet_dice": "mean",
+                    "UNet_recon_dice": "mean",
+                    "sex": "first",
+                    "age_bin": "first",
                 }
             )
 
+            for attribute, (
+                attribute_values,
+                attribute_name,
+            ) in sensitive_attributes.items():
+
+                results = bootstrap_fairness_segmentation(
+                    patient_preds, attribute, attribute_values
+                )
+
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER",
+                        "value": results["ser_class"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER",
+                        "value": results["ser_recon"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice",
+                        "value": results["delta_dice_class"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice",
+                        "value": results["delta_dice_recon"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER",
+                        "value": results["delta_ser"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice",
+                        "value": results["delta_delta_dice"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-p-value",
+                        "value": results["delta_ser_p_value"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-p-value",
+                        "value": results["delta_delta_dice_p_value"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-std-err",
+                        "value": results["delta_delta_dice_std"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-std-err",
+                        "value": results["delta_ser_std"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-bootstrapped",
+                        "value": results["delta_delta_dice_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-bootstrapped",
+                        "value": results["delta_ser_bootstrapped"],
+                    }
+                )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
+
 
 def bootstrap_psnr_difference(
     interpreter_results,
@@ -629,6 +672,7 @@ def bootstrap_psnr_difference(
     }
     return results
 
+
 def psnr_difference_prediction(predictions):
     sensitive_attributes = {
         "sex": (["M", "F"], "gender"),
@@ -646,15 +690,15 @@ def psnr_difference_prediction(predictions):
                 )
             )
             prediction_results["sex"] = prediction_results["sex"].apply(
-            lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
+                lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
             )
             prediction_results = prediction_results.groupby("patient_id").agg(
-                    {
-                        "psnr": "median",
-                        "sex": "first",
-                        "age_bin": "first",
-                    }
-                )
+                {
+                    "psnr": "median",
+                    "sex": "first",
+                    "age_bin": "first",
+                }
+            )
 
             for attribute, (
                 attribute_values,
@@ -812,10 +856,16 @@ def evaluate_ucsf(config, results_dir, name):
     )
 
     print("Evaluating fairness")
-    fairness_results = fairness_prediction_classifier(predictions)
-    fairness_results = pd.concat(
-        [fairness_results, fairness_prediction_segmentation(predictions)]
-    )
+    fairness_path = config["fairness_path"] if "fairness_path" in config else None
+    if fairness_path:
+        fairness_results = pd.read_csv(fairness_path)
+    else:
+        fairness_results = fairness_prediction_classifier(predictions)
+        fairness_results = pd.concat(
+            [fairness_results, fairness_prediction_segmentation(predictions)]
+        )
     fairness_results.to_csv(results_dir / f"{name}_fairness_results.csv", index=False)
 
     plot_ucsf_additional_bias(fairness_results, results_dir, name)
+    plot_ucsf_additional_bias_summary_classifier(fairness_results, results_dir, name)
+    plot_ucsf_additional_bias_summary_segmentation(fairness_results, results_dir, name)

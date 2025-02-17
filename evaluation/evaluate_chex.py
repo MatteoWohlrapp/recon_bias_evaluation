@@ -164,7 +164,9 @@ def bootstrap_fairness(
         "eop_class": observed_eop_class,
         "eop_recon": observed_eop_recon,
         "delta_eodd": observed_delta_eodd,
+        "delta_eodd_bootstrapped": boot_deltas_eodd.mean(),
         "delta_eop": observed_delta_eop,
+        "delta_eop_bootstrapped": boot_deltas_eop.mean(),
         "delta_eodd_p_value": p_value_eodd,
         "delta_eop_p_value": p_value_eop,
         "delta_eodd_std": std_eodd_delta,
@@ -440,6 +442,24 @@ def fairness_prediction(predictions, fairness_path):
                             "attribute": attribute_name,
                             "metric": "delta-EOP-std-err",
                             "value": results["delta_eop_std"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-bootstrapped",
+                            "value": results["delta_eodd_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-bootstrapped",
+                            "value": results["delta_eop_bootstrapped"],
                         }
                     )
 

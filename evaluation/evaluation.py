@@ -5,6 +5,7 @@ from pathlib import Path
 import logging
 from evaluate_ucsf import evaluate_ucsf
 from evaluate_chex import evaluate_chex
+from evaluate_combined import evaluate_combined
 import os
 
 
@@ -57,6 +58,9 @@ def main():
     elif config["dataset"] == "chex":
         logger.info("Evaluating CHEX dataset")
         evaluate_chex(config, results_dir, config["name"])
+    elif config["dataset"] == "combined":
+        logger.info("Evaluating combined dataset")
+        evaluate_combined(config, results_dir, config["name"])
     else:
         raise ValueError(f'Dataset {config["dataset"]} not supported')
 

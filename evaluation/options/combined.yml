@@ -1,0 +1,9 @@
+
+name: bias-evaluation-test
+
+results_path: /lotterlab/users/matteo/evaluations
+
+dataset: combined
+
+ucsf_path: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250217_174529/ucsf-evaluation_fairness_results.csv
+chex_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250217_171810/chex-evaluation_fairness_results.csv

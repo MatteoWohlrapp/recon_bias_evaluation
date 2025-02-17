@@ -4,8 +4,6 @@ results_path: /lotterlab/users/matteo/evaluations
 
 dataset: chex
 
-fairness_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250214_163703/chex-evaluation_fairness_results.csv
-
 predictions: 
     - photon_count: 100000
       model: unet
