@@ -190,7 +190,7 @@ def process_batch(batch, model, model_type, save_dir, device, dataset_type):
 
 
 def main():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--opt", type=str, required=True, help="Path to options YAML file."
