@@ -1,5 +1,5 @@
-name: ucsf_SDE-16-120
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf
+name: ucsf_SDE-8-fairness-160
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf
 batch_size: 8
 num_workers: 2
 
@@ -18,7 +18,7 @@ datasets:
   lower_slice: 60
   upper_slice: 130
   split: test
-  num_rays: 32
+  num_rays: 60
 
 models:
   network: Diffusion
@@ -48,5 +48,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Noise/UCSF/Diffusion/16/120_G.pth
+  pretrain_model_G: /lotterlab/users/matteo/code/image-restoration-sde/experiments/deblurring/ucsf-sde-8-fairness-0001/models/160_G.pth
   strict_load: True

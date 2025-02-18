@@ -1,12 +1,12 @@
-name: ucsf_diffusion_4
-results_path: /lotterlab/users/matteo/predictions
+name: ucsf_diffusion_8_fairness_160
+results_path: /lotterlab/users/matteo/predictions_fairness
 batch_size: 16
 num_workers: 4
 
 datasets:
   name: ucsf
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
-  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/ucsf/ucsf_SDE-04-117
+  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf/ucsf_SDE-8-fairness-160
   sampling_mask: radial  # or linear
   seed: 31415
   type: FLAIR  # or other MRI type
@@ -14,7 +14,7 @@ datasets:
   lower_slice: 60
   upper_slice: 130
   split: test
-  num_rays: 140
+  num_rays: 60
 
 models:
   network: Diffusion

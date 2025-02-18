@@ -1,0 +1,11 @@
+\begin{table}[]
+    \centering
+    \caption{Additional -metric- bias -description-introduced through denoising, colored by significance}\label{tab:ucsf-seg-colors}
+    \newcolumntype{C}{>{\centering\arraybackslash}m{1.1cm}} % Define equal-width centered columns
+    \begin{tabular}{l|CCC|c|CCC}
+        \hline
+                                & \multicolumn{3}{c|}{\textbf{Age}}                             & \textbf{} & \multicolumn{3}{c}{\textbf{Gender}}                                  \\
+                                & \textbf{U-Net}    & \textbf{Pix2Pix}     & \textbf{SDE}       & \textbf{} & \textbf{U-Net}       & \textbf{Pix2Pix}        & \textbf{SDE}        \\ \hline
+        \textbf{Segmentation Dice} & dice-unet-age & dice-pix2pix-age & dice-sde-age   &           & dice-unet-gender & dice-pix2pix-gender & dice-sde-gender \\
+        \end{tabular} -legend-
+\end{table}

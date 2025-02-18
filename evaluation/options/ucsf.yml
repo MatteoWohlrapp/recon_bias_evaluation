@@ -1,8 +1,9 @@
 
 name: ucsf-evaluation
+
 results_path: /lotterlab/users/matteo/evaluations
 
-dataset: ucsf
+mode: ucsf
 
 predictions: 
     - acceleration: 4

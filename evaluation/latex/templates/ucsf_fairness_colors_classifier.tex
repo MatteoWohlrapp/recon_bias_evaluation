@@ -1,0 +1,12 @@
+\begin{table}[]
+    \centering
+    \caption{Additional -metric- bias -description-introduced through denoising, colored by significance}\label{tab:ucsf-classifier-colors}
+    \newcolumntype{C}{>{\centering\arraybackslash}m{1.1cm}} % Define equal-width centered columns
+    \begin{tabular}{l|CCC|c|CCC}
+        \hline
+                                & \multicolumn{3}{c|}{\textbf{Age}}                             & \textbf{} & \multicolumn{3}{c}{\textbf{Gender}}                                  \\
+                                & \textbf{U-Net}    & \textbf{Pix2Pix}     & \textbf{SDE}       & \textbf{} & \textbf{U-Net}       & \textbf{Pix2Pix}        & \textbf{SDE}        \\ \hline
+        \textbf{Tumor Grade} & tgrade-unet-age & tgrade-pix2pix-age & tgrade-sde-age   &           & tgrade-unet-gender & tgrade-pix2pix-gender & tgrade-sde-gender \\
+        \textbf{Tumor Type}  & ttype-unet-age  & ttype-pix2pix-age  & ttype-sde-gender &           & ttype-unet-gender  & ttype-pix2pix-gender  & ttype-sde-gender  \\ \hline
+        \end{tabular} -legend-
+\end{table}

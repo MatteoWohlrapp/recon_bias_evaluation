@@ -164,7 +164,9 @@ def bootstrap_fairness(
         "eop_class": observed_eop_class,
         "eop_recon": observed_eop_recon,
         "delta_eodd": observed_delta_eodd,
+        "delta_eodd_bootstrapped": boot_deltas_eodd.mean(),
         "delta_eop": observed_delta_eop,
+        "delta_eop_bootstrapped": boot_deltas_eop.mean(),
         "delta_eodd_p_value": p_value_eodd,
         "delta_eop_p_value": p_value_eop,
         "delta_eodd_std": std_eodd_delta,
@@ -268,6 +270,8 @@ def fairness_prediction(predictions, fairness_path):
             average_EOP_recon = {}
             average_delta_EODD_recon = {}
             average_delta_EOP_recon = {}
+            average_delta_EOP_bootstrapped = {}
+            average_delta_EODD_bootstrapped = {}
             average_p_value_eop = {}
             average_p_value_eodd = {}
             average_std_eodd_delta = {}
@@ -322,6 +326,8 @@ def fairness_prediction(predictions, fairness_path):
                         average_p_value_eodd[attribute_name] = []
                         average_std_eodd_delta[attribute_name] = []
                         average_std_eop_delta[attribute_name] = []
+                        average_delta_EOP_bootstrapped[attribute_name] = []
+                        average_delta_EODD_bootstrapped[attribute_name] = []
 
                     results = bootstrap_fairness(
                         interpreter_results,
@@ -349,6 +355,12 @@ def fairness_prediction(predictions, fairness_path):
                     )
                     average_std_eop_delta[attribute_name].append(
                         results["delta_eop_std"]
+                    )
+                    average_delta_EOP_bootstrapped[attribute_name].append(
+                        results["delta_eop_bootstrapped"]
+                    )
+                    average_delta_EODD_bootstrapped[attribute_name].append(
+                        results["delta_eodd_bootstrapped"]
                     )
 
                     all_results.append(
@@ -440,6 +452,24 @@ def fairness_prediction(predictions, fairness_path):
                             "attribute": attribute_name,
                             "metric": "delta-EOP-std-err",
                             "value": results["delta_eop_std"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-bootstrapped",
+                            "value": results["delta_eodd_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-bootstrapped",
+                            "value": results["delta_eop_bootstrapped"],
                         }
                     )
 
@@ -534,7 +564,24 @@ def fairness_prediction(predictions, fairness_path):
                         "value": np.mean(average_std_eop_delta[attribute_name]),
                     }
                 )
-
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "delta-EOP-bootstrapped",
+                        "value": np.mean(average_delta_EOP_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "delta-EODD-bootstrapped",
+                        "value": np.mean(average_delta_EODD_bootstrapped[attribute_name]),
+                    }
+                )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
@@ -828,11 +875,11 @@ def evaluate_chex(config, results_dir, name):
     )
     plot_chex_performance(performance_results, results_dir, name)
 
-    print("Evaluating psnr difference")
+    """print("Evaluating psnr difference")
     psnr_difference = psnr_difference_prediction(predictions)
     psnr_difference.to_csv(
         results_dir / f"{name}_psnr_difference_results.csv", index=False
-    )
+    )"""
 
     print("Evaluating fairness")
     fairness_path = config["fairness_path"] if "fairness_path" in config else None

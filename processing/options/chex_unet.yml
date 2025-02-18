@@ -1,6 +1,6 @@
 name: chex_unet_reconstruction
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
-batch_size: 32
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf
+batch_size: 16
 num_workers: 8
 
 paths:

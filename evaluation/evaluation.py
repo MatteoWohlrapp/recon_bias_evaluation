@@ -5,6 +5,8 @@ from pathlib import Path
 import logging
 from evaluate_ucsf import evaluate_ucsf
 from evaluate_chex import evaluate_chex
+from evaluate_combined import evaluate_combined
+from evaluate_mitigation import evaluate_mitigation
 import os
 
 
@@ -51,14 +53,20 @@ def main():
     logger = setup_logger("base", results_dir)
     logger.info(f"Config:\n{yaml.dump(config, default_flow_style=False)}")
 
-    if config["dataset"] == "ucsf":
+    if config["mode"] == "ucsf":
         logger.info("Evaluating UCSF dataset")
         evaluate_ucsf(config, results_dir, config["name"])
-    elif config["dataset"] == "chex":
+    elif config["mode"] == "chex":
         logger.info("Evaluating CHEX dataset")
         evaluate_chex(config, results_dir, config["name"])
+    elif config["mode"] == "combined":
+        logger.info("Evaluating combined dataset")
+        evaluate_combined(config, results_dir, config["name"])
+    elif config["mode"] == "mitigation":
+        logger.info("Evaluating mitigated dataset")
+        evaluate_mitigation(config, results_dir, config["name"])
     else:
-        raise ValueError(f'Dataset {config["dataset"]} not supported')
+        raise ValueError(f'Dataset {config["mode"]} not supported')
 
 
 if __name__ == "__main__":

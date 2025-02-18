@@ -1,7 +1,7 @@
-name: chex_gan_10000_fairness_200
+name: chex_unet_10000_fairness_19
 results_path: /lotterlab/users/matteo/predictions_fairness
-batch_size: 16
-num_workers: 4
+batch_size: 8
+num_workers: 2
 
 datasets:
   name: chex
@@ -13,8 +13,8 @@ datasets:
   split: test
 
 models:
-  network: GAN
-  model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/pix2pix-chex10000-128-l1000-10-fairness/200_net_G.pth
+  network: UNet
+  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-chex-10000-001_20250213_133906/checkpoints/unet-fairness-chex-10000-001_20250213_133906_epoch_19_best.pth
 
 task_models: 
   name: chexpert-classifier

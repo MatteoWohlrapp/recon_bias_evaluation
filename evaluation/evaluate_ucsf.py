@@ -1,11 +1,149 @@
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 import numpy as np
-from plot_ucsf import plot_ucsf_performance, plot_ucsf_additional_bias
+from plot_ucsf import (
+    plot_ucsf_performance,
+    plot_ucsf_additional_bias,
+    plot_ucsf_additional_bias_summary_classifier,
+    plot_ucsf_additional_bias_summary_segmentation,
+)
 
 
-def bootstrap_fairness(predictions, metric, attribute):
-    pass
+def bootstrap_fairness_classifier(
+    interpreter_results,
+    attribute,
+    attribute_values,
+    interpreter_name,
+    gt_name,
+    n_iterations=1000,
+):
+    tpr_class = []
+    fpr_class = []
+    tpr_recon = []
+    fpr_recon = []
+
+    for val in attribute_values:
+        subgroup = interpreter_results[interpreter_results[attribute] == val]
+        if len(subgroup) == 0:
+            continue
+        tpr_class.append(get_tpr(subgroup[f"{interpreter_name}"], subgroup[gt_name]))
+        fpr_class.append(get_fpr(subgroup[f"{interpreter_name}"], subgroup[gt_name]))
+        tpr_recon.append(
+            get_tpr(subgroup[f"{interpreter_name}_recon"], subgroup[gt_name])
+        )
+        fpr_recon.append(
+            get_fpr(subgroup[f"{interpreter_name}_recon"], subgroup[gt_name])
+        )
+
+    # Compute EODD for baseline and recon:
+    observed_eodd_class = (
+        (max(tpr_class) - min(tpr_class)) + (max(fpr_class) - min(fpr_class))
+    ) / 2
+    observed_eodd_recon = (
+        (max(tpr_recon) - min(tpr_recon)) + (max(fpr_recon) - min(fpr_recon))
+    ) / 2
+
+    observed_eop_class = max(tpr_class) - min(tpr_class)
+    observed_eop_recon = max(tpr_recon) - min(tpr_recon)
+
+    observed_delta_eodd = observed_eodd_recon - observed_eodd_class
+    observed_delta_eop = observed_eop_recon - observed_eop_class
+
+    # Prepare to store bootstrap differences:
+    boot_deltas_eodd = []
+    boot_deltas_eop = []
+    # Bootstrap iterations:
+    for i in range(n_iterations):
+        boot_tpr_class = []
+        boot_fpr_class = []
+        boot_tpr_recon = []
+        boot_fpr_recon = []
+
+        boot_interpreter_results = interpreter_results.sample(
+            n=len(interpreter_results), replace=True
+        )
+
+        for val in attribute_values:
+            subgroup = boot_interpreter_results[
+                boot_interpreter_results[attribute] == val
+            ]
+            # Sample with replacement within this subgroup
+            boot_tpr_class.append(
+                get_tpr(
+                    subgroup[f"{interpreter_name}"],
+                    subgroup[gt_name],
+                )
+            )
+            boot_fpr_class.append(
+                get_fpr(
+                    subgroup[f"{interpreter_name}"],
+                    subgroup[gt_name],
+                )
+            )
+            boot_tpr_recon.append(
+                get_tpr(
+                    subgroup[f"{interpreter_name}_recon"],
+                    subgroup[gt_name],
+                )
+            )
+            boot_fpr_recon.append(
+                get_fpr(
+                    subgroup[f"{interpreter_name}_recon"],
+                    subgroup[gt_name],
+                )
+            )
+
+        # Compute EODD for this bootstrap sample:
+        boot_eodd_class = (
+            (max(boot_tpr_class) - min(boot_tpr_class))
+            + (max(boot_fpr_class) - min(boot_fpr_class))
+        ) / 2
+        boot_eodd_recon = (
+            (max(boot_tpr_recon) - min(boot_tpr_recon))
+            + (max(boot_fpr_recon) - min(boot_fpr_recon))
+        ) / 2
+        boot_delta_eodd = boot_eodd_recon - boot_eodd_class
+        boot_deltas_eodd.append(boot_delta_eodd)
+
+        boot_delta_eop = (
+            max(boot_tpr_recon)
+            - min(boot_tpr_recon)
+            - (max(boot_tpr_class) - min(boot_tpr_class))
+        )
+        boot_deltas_eop.append(boot_delta_eop)
+
+    boot_deltas_eodd = np.array(boot_deltas_eodd)
+    boot_deltas_eop = np.array(boot_deltas_eop)
+    # Compute the one-tailed p-value:
+    if observed_delta_eodd >= 0:
+        p_value_eodd = np.mean(boot_deltas_eodd <= 0)
+    else:
+        p_value_eodd = np.mean(boot_deltas_eodd >= 0)
+
+    if observed_delta_eop >= 0:
+        p_value_eop = np.mean(boot_deltas_eop <= 0)
+    else:
+        p_value_eop = np.mean(boot_deltas_eop >= 0)
+
+    std_eodd_delta = np.std(boot_deltas_eodd)
+    std_eop_delta = np.std(boot_deltas_eop)
+
+    results = {
+        "eodd_class": observed_eodd_class,
+        "eodd_recon": observed_eodd_recon,
+        "eop_class": observed_eop_class,
+        "eop_recon": observed_eop_recon,
+        "delta_eodd": observed_delta_eodd,
+        "delta_eodd_bootstrapped": boot_deltas_eodd.mean(),
+        "delta_eop": observed_delta_eop,
+        "delta_eop_bootstrapped": boot_deltas_eop.mean(),
+        "delta_eodd_p_value": p_value_eodd,
+        "delta_eop_p_value": p_value_eop,
+        "delta_eodd_std": std_eodd_delta,
+        "delta_eop_std": std_eop_delta,
+    }
+
+    return results
 
 
 def get_tpr(y_pred, y):
@@ -13,11 +151,6 @@ def get_tpr(y_pred, y):
     y_pred = y_pred.astype(int)
     y = y.astype(int)
     if y.sum() == 0:  # if no positive samples
-        print(
-            f"Warning: No positive samples found in ground truth. y_pred shape: {y_pred.shape}, y shape: {y.shape}"
-        )
-        print(f"y_pred values: {y_pred.value_counts()}")
-        print(f"y values: {y.value_counts()}")
         return 0.0
     tpr = y_pred[y == 1].sum() / y.sum()
     return tpr
@@ -29,11 +162,6 @@ def get_fpr(y_pred, y):
     y = y.astype(int)
     n_neg = len(y) - y.sum()
     if n_neg == 0:  # if no negative samples
-        print(
-            f"Warning: No negative samples found in ground truth. y_pred shape: {y_pred.shape}, y shape: {y.shape}"
-        )
-        print(f"y_pred values: {y_pred.value_counts()}")
-        print(f"y values: {y.value_counts()}")
         return 0.0
     fpr = y_pred[y == 0].sum() / n_neg
     return fpr
@@ -88,36 +216,28 @@ def fairness_prediction_classifier(predictions):
 
             for interpreter, (interpreter_name, gt_name) in interpreters.items():
                 # Get patient-level predictions and include sensitive attributes in the groupby
-                patient_preds_class = prediction_results.groupby("patient_id").agg(
+                patient_preds = prediction_results.groupby("patient_id").agg(
                     {
                         f"{interpreter_name}": "median",
-                        "sex": "first",
-                        "age_bin": "first",
-                    }
-                )
-                patient_preds_recon = prediction_results.groupby("patient_id").agg(
-                    {
                         f"{interpreter_name}_recon": "median",
+                        gt_name: "first",
                         "sex": "first",
                         "age_bin": "first",
                     }
-                )
-                patient_gt = prediction_results.groupby("patient_id").agg(
-                    {gt_name: "first", "sex": "first", "age_bin": "first"}
                 )
 
                 baseline_threshold = calculate_threshold(
-                    patient_preds_class[f"{interpreter_name}"], patient_gt[gt_name]
+                    patient_preds[f"{interpreter_name}"], patient_preds[gt_name]
                 )
                 recon_threshold = calculate_threshold(
-                    patient_preds_recon[f"{interpreter_name}_recon"],
-                    patient_gt[gt_name],
+                    patient_preds[f"{interpreter_name}_recon"],
+                    patient_preds[gt_name],
                 )
 
-                patient_preds_class[f"{interpreter_name}"] = patient_preds_class[
+                patient_preds[f"{interpreter_name}"] = patient_preds[
                     f"{interpreter_name}"
                 ].apply(lambda x: 1 if x >= baseline_threshold else 0)
-                patient_preds_recon[f"{interpreter_name}_recon"] = patient_preds_recon[
+                patient_preds[f"{interpreter_name}_recon"] = patient_preds[
                     f"{interpreter_name}_recon"
                 ].apply(lambda x: 1 if x >= recon_threshold else 0)
 
@@ -125,58 +245,13 @@ def fairness_prediction_classifier(predictions):
                     attribute_values,
                     attribute_name,
                 ) in sensitive_attributes.items():
-                    tpr_class = []
-                    tpr_recon = []
-                    fpr_class = []
-                    fpr_recon = []
-
-                    for attribute_value in attribute_values:
-                        # Instead, create filtered copies:
-                        filtered_preds_class = patient_preds_class[
-                            patient_preds_class[attribute] == attribute_value
-                        ]
-                        filtered_preds_recon = patient_preds_recon[
-                            patient_preds_recon[attribute] == attribute_value
-                        ]
-                        filtered_gt = patient_gt[
-                            patient_gt[attribute] == attribute_value
-                        ]
-
-                        tpr_class.append(
-                            get_tpr(
-                                filtered_preds_class[f"{interpreter_name}"],
-                                filtered_gt[gt_name],
-                            )
-                        )
-                        fpr_class.append(
-                            get_fpr(
-                                filtered_preds_class[f"{interpreter_name}"],
-                                filtered_gt[gt_name],
-                            )
-                        )
-                        tpr_recon.append(
-                            get_tpr(
-                                filtered_preds_recon[f"{interpreter_name}_recon"],
-                                filtered_gt[gt_name],
-                            )
-                        )
-                        fpr_recon.append(
-                            get_fpr(
-                                filtered_preds_recon[f"{interpreter_name}_recon"],
-                                filtered_gt[gt_name],
-                            )
-                        )
-
-                    EODD_class = (
-                        (max(tpr_class) - min(tpr_class))
-                        + (max(fpr_class) - min(fpr_class))
-                    ) / 2
-                    EOP_class = max(tpr_class) - min(tpr_class)
-                    EODD_recon = (
-                        (max(tpr_recon) - min(tpr_recon))
-                        + (max(fpr_recon) - min(fpr_recon))
-                    ) / 2
-                    EOP_recon = max(tpr_recon) - min(tpr_recon)
+                    results = bootstrap_fairness_classifier(
+                        patient_preds,
+                        attribute,
+                        attribute_values,
+                        interpreter_name,
+                        gt_name,
+                    )
 
                     all_results.append(
                         {
@@ -184,7 +259,7 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "EODD",
-                            "value": EODD_class,
+                            "value": results["eodd_class"],
                         }
                     )
                     all_results.append(
@@ -193,7 +268,7 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "EOP",
-                            "value": EOP_class,
+                            "value": results["eop_class"],
                         }
                     )
 
@@ -203,7 +278,7 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "EODD",
-                            "value": EODD_recon,
+                            "value": results["eodd_recon"],
                         }
                     )
                     all_results.append(
@@ -212,7 +287,7 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "EOP",
-                            "value": EOP_recon,
+                            "value": results["eop_recon"],
                         }
                     )
                     all_results.append(
@@ -221,7 +296,7 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "delta-EODD",
-                            "value": EODD_recon - EODD_class,
+                            "value": results["delta_eodd"],
                         }
                     )
                     all_results.append(
@@ -230,12 +305,146 @@ def fairness_prediction_classifier(predictions):
                             "interpreter": interpreter,
                             "attribute": attribute_name,
                             "metric": "delta-EOP",
-                            "value": EOP_recon - EOP_class,
+                            "value": results["delta_eop"],
                         }
                     )
-
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-p-value",
+                            "value": results["delta_eop_p_value"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-p-value",
+                            "value": results["delta_eodd_p_value"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-std-err",
+                            "value": results["delta_eodd_std"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-std-err",
+                            "value": results["delta_eop_std"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EODD-bootstrapped",
+                            "value": results["delta_eodd_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "delta-EOP-bootstrapped",
+                            "value": results["delta_eop_bootstrapped"],
+                        }
+                    )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
+
+
+def bootstrap_fairness_segmentation(
+    interpreter_results, attribute, attribute_values, n_iterations=1000
+):
+
+    dice_class = []
+    dice_recon = []
+
+    for val in attribute_values:
+        subgroup = interpreter_results[interpreter_results[attribute] == val]
+        dice_class.append(subgroup["UNet_dice"].mean())
+        dice_recon.append(subgroup["UNet_recon_dice"].mean())
+
+    delta_dice_class = max(dice_class) - min(dice_class)
+    delta_dice_recon = max(dice_recon) - min(dice_recon)
+
+    ser_class = (1 - min(dice_class)) / (1 - max(dice_class))
+    ser_recon = (1 - min(dice_recon)) / (1 - max(dice_recon))
+
+    observed_delta_delta_dice = delta_dice_recon - delta_dice_class
+    observed_delta_ser = ser_recon - ser_class
+
+    boot_delta_delta_dice = []
+    boot_delta_ser = []
+
+    for i in range(n_iterations):
+        dice_class = []
+        dice_recon = []
+
+        boot_interpreter_results = interpreter_results.sample(
+            n=len(interpreter_results), replace=True
+        )
+
+        for val in attribute_values:
+            subgroup = boot_interpreter_results[
+                boot_interpreter_results[attribute] == val
+            ]
+            dice_class.append(subgroup["UNet_dice"].mean())
+            dice_recon.append(subgroup["UNet_recon_dice"].mean())
+
+        boot_ser_class = (1 - min(dice_class)) / (1 - max(dice_class))
+        boot_ser_recon = (1 - min(dice_recon)) / (1 - max(dice_recon))
+
+        boot_delta_dice_class = max(dice_class) - min(dice_class)
+        boot_delta_dice_recon = max(dice_recon) - min(dice_recon)
+
+        boot_delta_delta_dice.append(boot_delta_dice_recon - boot_delta_dice_class)
+        boot_delta_ser.append(boot_ser_recon - boot_ser_class)
+
+    boot_delta_delta_dice = np.array(boot_delta_delta_dice)
+    boot_delta_ser = np.array(boot_delta_ser)
+
+    if observed_delta_delta_dice >= 0:
+        p_value_delta_delta_dice = np.mean(boot_delta_delta_dice <= 0)
+    else:
+        p_value_delta_delta_dice = np.mean(boot_delta_delta_dice >= 0)
+
+    if observed_delta_ser >= 0:
+        p_value_delta_ser = np.mean(boot_delta_ser <= 0)
+    else:
+        p_value_delta_ser = np.mean(boot_delta_ser >= 0)
+
+    std_delta_delta_dice = np.std(boot_delta_delta_dice)
+    std_delta_ser = np.std(boot_delta_ser)
+
+    results = {
+        "delta_dice_class": delta_dice_class,
+        "delta_dice_recon": delta_dice_recon,
+        "ser_class": ser_class,
+        "ser_recon": ser_recon,
+        "delta_delta_dice": observed_delta_delta_dice,
+        "delta_ser": observed_delta_ser,
+        "delta_delta_dice_bootstrapped": boot_delta_delta_dice.mean(),
+        "delta_ser_bootstrapped": boot_delta_ser.mean(),
+        "delta_delta_dice_p_value": p_value_delta_delta_dice,
+        "delta_ser_p_value": p_value_delta_ser,
+        "delta_delta_dice_std": std_delta_delta_dice,
+        "delta_ser_std": std_delta_ser,
+    }
+    return results
 
 
 def fairness_prediction_segmentation(predictions):
@@ -253,118 +462,289 @@ def fairness_prediction_segmentation(predictions):
             "model": prediction["model"],
             "acceleration": prediction["acceleration"],
             "prediction_results": prediction["prediction_results"].copy(),
+            "fairness": prediction["fairness"],
         }
-        original_model = prediction["model"]
-        prediction_results = prediction["prediction_results"]
-        prediction_results["age_bin"] = prediction_results["age"].apply(
-            lambda x: "Y" if float(str(x).split("(")[1].split(",")[0]) <= 58 else "O"
-        )
-        prediction_results["sex"] = prediction_results["sex"].apply(
-            lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
-        )
+        if prediction["fairness"]:
+            original_model = prediction["model"]
+            prediction_results = prediction["prediction_results"]
+            prediction_results["age_bin"] = prediction_results["age"].apply(
+                lambda x: (
+                    "Y" if float(str(x).split("(")[1].split(",")[0]) <= 58 else "O"
+                )
+            )
+            prediction_results["sex"] = prediction_results["sex"].apply(
+                lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
+            )
 
-        # Get patient-level predictions and include sensitive attributes in the groupby
-        patient_preds_class = prediction_results.groupby("patient_id").agg(
-            {"UNet_dice": "mean", "sex": "first", "age_bin": "first"}
-        )
-        patient_preds_recon = prediction_results.groupby("patient_id").agg(
-            {"UNet_recon_dice": "mean", "sex": "first", "age_bin": "first"}
-        )
+            # Get patient-level predictions and include sensitive attributes in the groupby
+            patient_preds = prediction_results.groupby("patient_id").agg(
+                {
+                    "UNet_dice": "mean",
+                    "UNet_recon_dice": "mean",
+                    "sex": "first",
+                    "age_bin": "first",
+                }
+            )
 
-        for attribute, (
-            attribute_values,
-            attribute_name,
-        ) in sensitive_attributes.items():
-            dice_class_by_group = []
-            dice_recon_by_group = []
+            for attribute, (
+                attribute_values,
+                attribute_name,
+            ) in sensitive_attributes.items():
 
-            for attribute_value in attribute_values:
-                filtered_preds_class = patient_preds_class[
-                    patient_preds_class[attribute] == attribute_value
-                ]
-                filtered_preds_recon = patient_preds_recon[
-                    patient_preds_recon[attribute] == attribute_value
-                ]
-
-                dice_class_by_group.append(filtered_preds_class["UNet_dice"].mean())
-                dice_recon_by_group.append(
-                    filtered_preds_recon["UNet_recon_dice"].mean()
+                results = bootstrap_fairness_segmentation(
+                    patient_preds, attribute, attribute_values
                 )
 
-            # Calculate SER for baseline (using 1 - Dice)
-            ser_class = (1 - min(dice_class_by_group)) / (1 - max(dice_class_by_group))
-            # Calculate delta between max and min Dice scores
-            delta_dice_class = max(dice_class_by_group) - min(dice_class_by_group)
-
-            # Calculate SER for reconstruction (using 1 - Dice)
-            ser_recon = (1 - min(dice_recon_by_group)) / (1 - max(dice_recon_by_group))
-            # Calculate delta between max and min Dice scores
-            delta_dice_recon = max(dice_recon_by_group) - min(dice_recon_by_group)
-
-            all_results.append(
-                {
-                    "model": "baseline",
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "SER",
-                    "value": ser_class,
-                }
-            )
-            all_results.append(
-                {
-                    "model": "baseline",
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-dice",
-                    "value": delta_dice_class,
-                }
-            )
-
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "SER",
-                    "value": ser_recon,
-                }
-            )
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-SER",
-                    "value": ser_recon - ser_class,
-                }
-            )
-
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-dice",
-                    "value": delta_dice_recon,
-                }
-            )
-
-            all_results.append(
-                {
-                    "model": original_model,
-                    "interpreter": "dice",
-                    "attribute": attribute_name,
-                    "metric": "delta-delta-dice",
-                    "value": delta_dice_recon - delta_dice_class,
-                }
-            )
-
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER",
+                        "value": results["ser_class"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER",
+                        "value": results["ser_recon"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice",
+                        "value": results["delta_dice_class"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice",
+                        "value": results["delta_dice_recon"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER",
+                        "value": results["delta_ser"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice",
+                        "value": results["delta_delta_dice"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-p-value",
+                        "value": results["delta_ser_p_value"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-p-value",
+                        "value": results["delta_delta_dice_p_value"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-std-err",
+                        "value": results["delta_delta_dice_std"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-std-err",
+                        "value": results["delta_ser_std"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-delta-dice-bootstrapped",
+                        "value": results["delta_delta_dice_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-SER-bootstrapped",
+                        "value": results["delta_ser_bootstrapped"],
+                    }
+                )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
 
+def bootstrap_psnr_difference(
+    interpreter_results,
+    attribute,
+    attribute_values,
+    interpreter_name,
+    n_iterations=1000,
+):
+    """
+    Perform a bootstrap test to compare a statistic (e.g., the mean) between two groups,
+    even when the groups have different sample sizes.
+
+    Parameters:
+        group1, group2: Arrays or lists containing the data for each group.
+        statistic: Function to compute the statistic of interest (default is np.mean).
+        n_iterations: Number of bootstrap iterations (default is 10,000).
+
+    Returns:
+        observed_diff: The observed difference in the statistic between the two groups.
+        p_value: The two-tailed bootstrap p-value.
+    """
+    psnr_values = []
+
+    for i, val in enumerate(attribute_values):
+        subgroup = interpreter_results[interpreter_results[attribute] == val]
+        psnr_values.append((subgroup[f"{interpreter_name}"].mean(), i))
+
+    min_psnr, min_index = min(psnr_values, key=lambda x: x[0])
+    max_psnr, max_index = max(psnr_values, key=lambda x: x[0])
+
+    # Calculate the observed difference
+    observed_diff = max_psnr - min_psnr
+
+    boot_diffs = []
+    # Perform bootstrapping
+    for i in range(n_iterations):
+        boot_psnr_values = []
+
+        boot_interpreter_results = interpreter_results.sample(
+            n=len(interpreter_results), replace=True
+        )
+        for val in attribute_values:
+            subgroup = boot_interpreter_results[
+                boot_interpreter_results[attribute] == val
+            ]
+            boot_psnr_values.append(subgroup[f"{interpreter_name}"].mean())
+
+        boot_diffs.append(boot_psnr_values[max_index] - boot_psnr_values[min_index])
+
+    boot_diffs = np.array(boot_diffs)
+
+    # Calculate the one-tailed p-value:
+    # Proportion of bootstrap differences as or more extreme than the observed difference.
+    if observed_diff >= 0:
+        p_value = np.mean(boot_diffs <= 0)
+    else:
+        p_value = np.mean(boot_diffs >= 0)
+
+    results = {
+        "delta_psnr": observed_diff,
+        "delta_psnr_p_value": p_value,
+        "delta_psnr_std": np.std(boot_diffs),
+        "delta_psnr_percent": (observed_diff / min_psnr) * 100,
+    }
+    return results
+
+
 def psnr_difference_prediction(predictions):
-    pass
+    sensitive_attributes = {
+        "sex": (["M", "F"], "gender"),
+        "age_bin": (["O", "Y"], "age"),
+    }
+
+    all_results = []
+    for prediction in predictions:
+        if prediction["fairness"]:
+            original_model = prediction["model"]
+            prediction_results = prediction["prediction_results"].copy()
+            prediction_results["age_bin"] = prediction_results["age"].apply(
+                lambda x: (
+                    "Y" if float(str(x).split("(")[1].split(",")[0]) <= 58 else "O"
+                )
+            )
+            prediction_results["sex"] = prediction_results["sex"].apply(
+                lambda x: "M" if float(str(x).split("(")[1].split(")")[0]) == 1 else "F"
+            )
+            prediction_results = prediction_results.groupby("patient_id").agg(
+                {
+                    "psnr": "median",
+                    "sex": "first",
+                    "age_bin": "first",
+                }
+            )
+
+            for attribute, (
+                attribute_values,
+                attribute_name,
+            ) in sensitive_attributes.items():
+
+                results = bootstrap_psnr_difference(
+                    prediction_results,
+                    attribute,
+                    attribute_values,
+                    "psnr",
+                )
+
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "attribute": attribute_name,
+                        "metric": "delta-psnr",
+                        "value": results["delta_psnr"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "attribute": attribute_name,
+                        "metric": "delta-psnr-p-value",
+                        "value": results["delta_psnr_p_value"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "attribute": attribute_name,
+                        "metric": "delta-psnr-std",
+                        "value": results["delta_psnr_std"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "attribute": attribute_name,
+                        "metric": "delta-psnr-percent",
+                        "value": results["delta_psnr_percent"],
+                    }
+                )
+    return pd.DataFrame(all_results)
 
 
 def performance_prediction(predictions):
@@ -462,17 +842,30 @@ def evaluate_ucsf(config, results_dir, name):
             }
         )
 
+    print("Evaluating performance")
     performance_results = performance_prediction(predictions)
     performance_results.to_csv(
         results_dir / f"{name}_performance_results.csv", index=False
     )
-
     plot_ucsf_performance(performance_results, results_dir, name)
 
-    fairness_results = fairness_prediction_classifier(predictions)
-    fairness_results = pd.concat(
-        [fairness_results, fairness_prediction_segmentation(predictions)]
+    print("Evaluating psnr difference")
+    psnr_difference = psnr_difference_prediction(predictions)
+    psnr_difference.to_csv(
+        results_dir / f"{name}_psnr_difference_results.csv", index=False
     )
+
+    print("Evaluating fairness")
+    fairness_path = config["fairness_path"] if "fairness_path" in config else None
+    if fairness_path:
+        fairness_results = pd.read_csv(fairness_path)
+    else:
+        fairness_results = fairness_prediction_classifier(predictions)
+        fairness_results = pd.concat(
+            [fairness_results, fairness_prediction_segmentation(predictions)]
+        )
     fairness_results.to_csv(results_dir / f"{name}_fairness_results.csv", index=False)
 
     plot_ucsf_additional_bias(fairness_results, results_dir, name)
+    plot_ucsf_additional_bias_summary_classifier(fairness_results, results_dir, name)
+    plot_ucsf_additional_bias_summary_segmentation(fairness_results, results_dir, name)
