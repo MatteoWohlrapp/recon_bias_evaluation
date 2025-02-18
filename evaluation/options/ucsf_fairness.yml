@@ -2,7 +2,7 @@
 name: ucsf-evaluation-fairness-unet-8
 results_path: /lotterlab/users/matteo/evaluations
 
-dataset: ucsf
+mode: ucsf
 
 predictions: 
     - acceleration: 8

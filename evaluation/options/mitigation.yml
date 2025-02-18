@@ -1,0 +1,10 @@
+
+name: chex-evaluation_unet_fairness_l001_t03_e18-mitigation
+
+results_path: /lotterlab/users/matteo/evaluations
+
+mode: mitigation
+dataset: chex
+
+csv_standard: /lotterlab/users/matteo/evaluations/chex-evaluation_20250217_171810/chex-evaluation_fairness_results.csv
+csv_mitigated: /lotterlab/users/matteo/evaluations/chex-evaluation_unet_fairness_l001_t03_e18_20250218_091806/chex-evaluation_unet_fairness_l001_t03_e18_fairness_results.csv

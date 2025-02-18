@@ -2,7 +2,7 @@
 name: chex-evaluation
 results_path: /lotterlab/users/matteo/evaluations
 
-dataset: chex
+mode: chex
 
 predictions: 
     - photon_count: 100000

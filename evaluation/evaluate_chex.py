@@ -270,6 +270,8 @@ def fairness_prediction(predictions, fairness_path):
             average_EOP_recon = {}
             average_delta_EODD_recon = {}
             average_delta_EOP_recon = {}
+            average_delta_EOP_bootstrapped = {}
+            average_delta_EODD_bootstrapped = {}
             average_p_value_eop = {}
             average_p_value_eodd = {}
             average_std_eodd_delta = {}
@@ -324,6 +326,8 @@ def fairness_prediction(predictions, fairness_path):
                         average_p_value_eodd[attribute_name] = []
                         average_std_eodd_delta[attribute_name] = []
                         average_std_eop_delta[attribute_name] = []
+                        average_delta_EOP_bootstrapped[attribute_name] = []
+                        average_delta_EODD_bootstrapped[attribute_name] = []
 
                     results = bootstrap_fairness(
                         interpreter_results,
@@ -351,6 +355,12 @@ def fairness_prediction(predictions, fairness_path):
                     )
                     average_std_eop_delta[attribute_name].append(
                         results["delta_eop_std"]
+                    )
+                    average_delta_EOP_bootstrapped[attribute_name].append(
+                        results["delta_eop_bootstrapped"]
+                    )
+                    average_delta_EODD_bootstrapped[attribute_name].append(
+                        results["delta_eodd_bootstrapped"]
                     )
 
                     all_results.append(
@@ -554,7 +564,24 @@ def fairness_prediction(predictions, fairness_path):
                         "value": np.mean(average_std_eop_delta[attribute_name]),
                     }
                 )
-
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "delta-EOP-bootstrapped",
+                        "value": np.mean(average_delta_EOP_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "delta-EODD-bootstrapped",
+                        "value": np.mean(average_delta_EODD_bootstrapped[attribute_name]),
+                    }
+                )
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
