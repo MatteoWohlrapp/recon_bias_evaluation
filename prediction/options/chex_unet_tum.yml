@@ -1,6 +1,6 @@
-name: chex_diffusion_10000_fairness_0001_30
+name: chex_unet_10000_fairness_0001_temperature03-19
 results_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/prediction
-batch_size: 16
+batch_size: 32
 num_workers: 4
 
 datasets:
@@ -8,12 +8,13 @@ datasets:
   csv_path_A: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_10000.csv
   csv_path_B: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chexpert-metadata-processed.csv
   dataroot_A: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
-  dataroot_B: /vol/miltank/datasets/CheXpert 
-  processed_image_root: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/processed/chex/chex_SDE-10000-fairness-30-2
+  dataroot_B: /vol/miltank/datasets/CheXpert
+  seed: 31415
   split: test
 
 models:
-  network: Diffusion
+  network: UNet
+  model_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/recon_bias/output/unet-fairness-chex-lambda0001-temperature03_20250217_141616/checkpoints/unet-fairness-chex-lambda0001-temperature03_20250217_141616_epoch_19_best.pth
 
 task_models: 
   name: chexpert-classifier
