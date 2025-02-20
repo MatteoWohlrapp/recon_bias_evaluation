@@ -1,0 +1,28 @@
+name: chex-visualization
+results_path: /lotterlab/users/matteo/visualizations
+
+target_column: "Lung Lesion_recon"
+
+csv_files:
+  - /lotterlab/users/matteo/predictions/chex_unet_10000_20250212_155033/chex_unet_10000_results.csv
+  - /lotterlab/users/matteo/predictions/chex_gan_10000_20250204_201346/chex_gan_10000_results.csv
+  - /lotterlab/users/matteo/predictions/chex_diffusion_10000_20250204_210108/chex_diffusion_10000_results.csv
+
+datasets:
+  name: "chex"  # or "ucsf"
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
+  dataroot_B: /lotterlab/datasets/
+
+models:
+  - network: "UNet"
+    model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-chex-10000-l0001-t03-ce05_20250219_125548/checkpoints/unet-fairness-chex-10000-l0001-t03-ce05_20250219_125548_epoch_5_best.pth 
+  - network: "GAN"
+    model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/pix2pix-chex10000-128-l1000-10-fairness/200_net_G.pth
+  - network: "Diffusion"
+    processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/chex/chex_SDE-10000-40
+
+task_model:
+  name: chexpert-classifier
+  path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt

@@ -1,0 +1,33 @@
+name: ucsf-visualization
+results_path: /lotterlab/users/matteo/visualizations
+
+target_column: "UNet_recon_dice"
+
+csv_files:
+  - /lotterlab/users/matteo/predictions/ucsf_unet_8_20250207_150102/ucsf_unet_8_results.csv
+  - /lotterlab/users/matteo/predictions/ucsf_gan_8_20250207_150001/ucsf_gan_8_results.csv
+  - /lotterlab/users/matteo/predictions/ucsf_diffusion_8_20250207_145910/ucsf_diffusion_8_results.csv
+
+datasets:
+  name: "ucsf"  # or "ucsf"
+  dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  sampling_mask: radial
+  seed: 31415
+  type: FLAIR
+  pathology: []
+  lower_slice: 60
+  upper_slice: 130
+  split: test
+  num_rays: 60
+
+models:
+  - network: "UNet"
+    model_path: /lotterlab/users/matteo/models/Noise/UCSF/Unet/unet-8_20250106_102815/checkpoints/unet-8_20250106_102815_epoch_11_best.pth
+  - network: "GAN"
+    model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/ucsf-08-l1000-fairness-10/200_net_G.pth
+  - network: "Diffusion"
+    processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf/ucsf_SDE-8-fairness-160
+
+task_model:
+  name: segmentation
+  path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth
