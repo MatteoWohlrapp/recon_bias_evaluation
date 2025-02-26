@@ -76,7 +76,6 @@ def load_reconstruction_models(config, device):
     model_configs = config["models"]
     for model_config in model_configs:
         if model_config["network"] == "UNet":
-
             model = ReconstructionModel()
             if config["datasets"]["name"] == "chex":
                 print("Loading UNetChex")
@@ -85,12 +84,18 @@ def load_reconstruction_models(config, device):
                 print("Loading UNetUCSF")
                 network = UNetUCSF()
             model.set_network(network)
+            print(f"Loading model from {model_config['model_path']}")
             model.load_state_dict(
                 torch.load(model_config["model_path"], map_location=device)
             )
             model.network.eval()
             model.to(device)
-            reconstruction_models[model_config["network"]] = lambda x: model(x["image_A"].unsqueeze(0).to(device))
+            
+            # Create a closure that captures the specific model instance
+            def make_processor(model_instance):
+                return lambda x: model_instance(x["image_A"].unsqueeze(0).to(device))
+            
+            reconstruction_models[model_config["network"]] = make_processor(model)
 
         elif model_config["network"] == "GAN":
 
@@ -225,16 +230,18 @@ def find_interesting_patterns(csv_files, target_column, top_k=5):
 
 def save_colorbar(save_path, title="Intensity"):
     """
-    Save a standalone colorbar using the jet colormap
+    Save a standalone colorbar using the jet colormap with transparent background
     
     Args:
         save_path (Path): Path to save the colorbar
         title (str): Title for the colorbar
     """
-    plt.figure(figsize=(8, 2))
+    # Create figure with transparent background
+    plt.figure(figsize=(8, 2), facecolor='none')
     
     # Create axes for the colorbar
     ax = plt.gca()
+    ax.set_facecolor('none')  # Make axes background transparent
     
     # Create a dummy scalar mappable using the jet colormap
     sm = plt.cm.ScalarMappable(cmap=plt.cm.jet)
@@ -247,8 +254,8 @@ def save_colorbar(save_path, title="Intensity"):
     # Hide the main axes
     ax.set_visible(False)
     
-    # Save and close
-    plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1)
+    # Save with transparent background
+    plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1, transparent=True)
     plt.close()
 
 def save_difference_with_colormap(image1, image2, save_path, alpha=1.0):
@@ -344,11 +351,11 @@ def save_analysis_images(row_idx, image_A, image_B, reconstructed_imgs, classifi
     
     # Get original images
     original_img = image_B.to(device)
-    reconstructed_img = image_A.to(device)
+    noisy_img = image_A.to(device)
     
     # Save the original images
     save_image(original_img, case_dir / f"{row_idx}_original.png")
-    save_image(reconstructed_img, case_dir / f"{row_idx}_reconstructed.png")
+    save_image(noisy_img, case_dir / f"{row_idx}_noisy.png")
     
     # Handle ground truth segmentation if available
     if segmentation_slice is not None:
@@ -358,17 +365,6 @@ def save_analysis_images(row_idx, image_A, image_B, reconstructed_imgs, classifi
         gt_overlay = create_segmentation_overlay(original_img, gt_segmentation)
         save_image(gt_overlay, case_dir / f"{row_idx}_gt_overlay.png")
     
-    # Get prediction from classifier (either segmentation mask or GradCAM)
-    if isinstance(classifier, SegmentationModel):
-        _, prediction_mask = compute_gradcam(classifier, original_img)
-        save_image(prediction_mask, case_dir / f"{row_idx}_prediction.png")
-        # Create and save overlay for prediction
-        pred_overlay = create_segmentation_overlay(original_img, prediction_mask)
-        save_image(pred_overlay, case_dir / f"{row_idx}_prediction_overlay.png")
-    else:
-        _, gradcam = compute_gradcam(classifier, original_img)
-        save_image_with_gradcam(original_img, gradcam, case_dir / f"{row_idx}_gradcam.png")
-    
     # For each reconstruction
     for model_name, recon_img in reconstructed_imgs.items():
         model_dir = case_dir / model_name
@@ -376,6 +372,17 @@ def save_analysis_images(row_idx, image_A, image_B, reconstructed_imgs, classifi
         
         # Save reconstructed image
         save_image(recon_img, model_dir / "reconstruction.png")
+
+            # Get prediction from classifier (either segmentation mask or GradCAM)
+        if isinstance(classifier, SegmentationModel):
+            _, prediction_mask = compute_gradcam(classifier, recon_img)
+            save_image(prediction_mask, case_dir / f"{row_idx}_prediction.png")
+            # Create and save overlay for prediction
+            pred_overlay = create_segmentation_overlay(original_img, recon_img)
+            save_image(pred_overlay, case_dir / f"{row_idx}_prediction_overlay.png")
+        else:
+            _, gradcam = compute_gradcam(classifier, recon_img)
+            save_image_with_gradcam(recon_img, gradcam, model_dir / "reconstruction_gradcam.png")
         
         # Save difference image with colormap
         save_difference_with_colormap(
@@ -437,7 +444,6 @@ def compute_gradcam(model, input_image, target_layer=None):
     if isinstance(model, SegmentationModel):
         with torch.no_grad():
             output = model(input_image)
-            #mask = torch.sigmoid(output)
             mask = torch.where(output > 0.5, 1, 0)
             return original_image.cpu(), mask.cpu()
     
@@ -460,14 +466,16 @@ def compute_gradcam(model, input_image, target_layer=None):
     handle1 = target_layer.register_forward_hook(save_activation)
     handle2 = target_layer.register_full_backward_hook(save_gradient)
     
-    output = model(input_image)
-    if output.dim() > 1:
-        score = output[:, 0]
-    else:
-        score = output
-    
-    model.zero_grad()
-    score.backward()
+    # Compute output and gradients with retain_graph=True
+    with torch.enable_grad():
+        output = model(input_image)
+        if output.dim() > 1:
+            score = output[:, 0]
+        else:
+            score = output
+        
+        model.zero_grad()
+        score.backward(retain_graph=True)  # Add retain_graph=True here
     
     handle1.remove()
     handle2.remove()
