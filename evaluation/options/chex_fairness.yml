@@ -1,6 +1,6 @@
 
-name: chex-evaluation_unet_fairness_l001_t03_e18
-results_path: /lotterlab/users/matteo/evaluations
+name: chex-evaluation_unet_fairness_l0005_t03_ce05_e04
+results_path: /lotterlab/users/matteo/evaluations_fairness
 
 mode: chex
 
@@ -9,11 +9,11 @@ mode: chex
 predictions: 
     - photon_count: 10000
       model: unet
-      predictions: '/lotterlab/users/matteo/predictions_fairness/chex_unet_10000_001_03_epoch18_20250217_182731/chex_unet_10000_001_03_epoch18_results.csv'
+      predictions: '/lotterlab/users/matteo/predictions_fairness/chex_unet_10000_l0005_t03_ce05_e04_20250224_162316/chex_unet_10000_l0005_t03_ce05_e04_results.csv'
       fairness: True
     - photon_count: 10000
       model: pix2pix
-      predictions: '/lotterlab/users/matteo/predictions_fairness_old/chex_gan_10000_fairness_100_20250215_105531/chex_gan_10000_fairness_100_results.csv'
+      predictions: '/lotterlab/users/matteo/predictions/chex_gan_100000_20250204_203134/chex_gan_100000_results.csv'
       fairness: True
     - photon_count: 10000
       model: sde

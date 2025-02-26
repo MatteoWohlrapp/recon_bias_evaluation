@@ -5,5 +5,5 @@ results_path: /lotterlab/users/matteo/evaluations
 
 mode: combined
 
-ucsf_path: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250217_174529/ucsf-evaluation_fairness_results.csv
-chex_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250217_171810/chex-evaluation_fairness_results.csv
+ucsf_path: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250225_122332/ucsf-evaluation_fairness_results.csv
+chex_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250225_122247/chex-evaluation_fairness_results.csv

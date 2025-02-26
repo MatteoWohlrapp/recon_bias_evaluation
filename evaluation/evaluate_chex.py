@@ -82,6 +82,10 @@ def bootstrap_fairness(
     # Prepare to store bootstrap differences:
     boot_deltas_eodd = []
     boot_deltas_eop = []
+    boot_baseline_eodd = []
+    boot_baseline_eop = []
+    boot_recon_eodd = []
+    boot_recon_eop = []
     # Bootstrap iterations:
     for i in range(n_iterations):
         boot_tpr_class = []
@@ -134,16 +138,22 @@ def bootstrap_fairness(
         ) / 2
         boot_delta_eodd = boot_eodd_recon - boot_eodd_class
         boot_deltas_eodd.append(boot_delta_eodd)
+        boot_baseline_eodd.append(boot_eodd_class)
+        boot_recon_eodd.append(boot_eodd_recon)
 
-        boot_delta_eop = (
-            max(boot_tpr_recon)
-            - min(boot_tpr_recon)
-            - (max(boot_tpr_class) - min(boot_tpr_class))
-        )
+        boot_eop_class = max(boot_tpr_class) - min(boot_tpr_class)
+        boot_eop_recon = max(boot_tpr_recon) - min(boot_tpr_recon)
+        boot_delta_eop = boot_eop_recon - boot_eop_class
         boot_deltas_eop.append(boot_delta_eop)
+        boot_baseline_eop.append(boot_eop_class)
+        boot_recon_eop.append(boot_eop_recon)
 
     boot_deltas_eodd = np.array(boot_deltas_eodd)
     boot_deltas_eop = np.array(boot_deltas_eop)
+    boot_baseline_eodd = np.array(boot_baseline_eodd)
+    boot_baseline_eop = np.array(boot_baseline_eop)
+    boot_recon_eodd = np.array(boot_recon_eodd)
+    boot_recon_eop = np.array(boot_recon_eop)
     # Compute the one-tailed p-value:
     if observed_delta_eodd >= 0:
         p_value_eodd = np.mean(boot_deltas_eodd <= 0)
@@ -171,6 +181,14 @@ def bootstrap_fairness(
         "delta_eop_p_value": p_value_eop,
         "delta_eodd_std": std_eodd_delta,
         "delta_eop_std": std_eop_delta,
+        "eodd_class_bootstrapped": boot_baseline_eodd.mean(),
+        "eop_class_bootstrapped": boot_baseline_eop.mean(),
+        "eodd_recon_bootstrapped": boot_recon_eodd.mean(),
+        "eop_recon_bootstrapped": boot_recon_eop.mean(),
+        "eodd_class_std_bootstrapped": boot_baseline_eodd.std(),
+        "eop_class_std_bootstrapped": boot_baseline_eop.std(),
+        "eodd_recon_std_bootstrapped": boot_recon_eodd.std(),
+        "eop_recon_std_bootstrapped": boot_recon_eop.std(),
     }
 
     return results
@@ -276,6 +294,14 @@ def fairness_prediction(predictions, fairness_path):
             average_p_value_eodd = {}
             average_std_eodd_delta = {}
             average_std_eop_delta = {}
+            average_eodd_class_bootstrapped = {}
+            average_eop_class_bootstrapped = {}
+            average_eodd_recon_bootstrapped = {}
+            average_eop_recon_bootstrapped = {}
+            average_eodd_class_std_bootstrapped = {}
+            average_eop_class_std_bootstrapped = {}
+            average_eodd_recon_std_bootstrapped = {}
+            average_eop_recon_std_bootstrapped = {}
 
             for interpreter, interpreter_name in interpreters.items():
                 print(f"Evaluating {interpreter_name}")
@@ -328,6 +354,14 @@ def fairness_prediction(predictions, fairness_path):
                         average_std_eop_delta[attribute_name] = []
                         average_delta_EOP_bootstrapped[attribute_name] = []
                         average_delta_EODD_bootstrapped[attribute_name] = []
+                        average_eodd_class_bootstrapped[attribute_name] = []
+                        average_eop_class_bootstrapped[attribute_name] = []
+                        average_eodd_recon_bootstrapped[attribute_name] = []
+                        average_eop_recon_bootstrapped[attribute_name] = []
+                        average_eodd_class_std_bootstrapped[attribute_name] = []
+                        average_eop_class_std_bootstrapped[attribute_name] = []
+                        average_eodd_recon_std_bootstrapped[attribute_name] = []
+                        average_eop_recon_std_bootstrapped[attribute_name] = []
 
                     results = bootstrap_fairness(
                         interpreter_results,
@@ -362,7 +396,31 @@ def fairness_prediction(predictions, fairness_path):
                     average_delta_EODD_bootstrapped[attribute_name].append(
                         results["delta_eodd_bootstrapped"]
                     )
-
+                    average_eodd_class_bootstrapped[attribute_name].append(
+                        results["eodd_class_bootstrapped"]
+                    )
+                    average_eop_class_bootstrapped[attribute_name].append(
+                        results["eop_class_bootstrapped"]
+                    )
+                    average_eodd_recon_bootstrapped[attribute_name].append(
+                        results["eodd_recon_bootstrapped"]
+                    )
+                    average_eop_recon_bootstrapped[attribute_name].append(
+                        results["eop_recon_bootstrapped"]
+                    )
+                    average_eodd_class_std_bootstrapped[attribute_name].append(
+                        results["eodd_class_std_bootstrapped"]
+                    )
+                    average_eop_class_std_bootstrapped[attribute_name].append(
+                        results["eop_class_std_bootstrapped"]
+                    )
+                    average_eodd_recon_std_bootstrapped[attribute_name].append(
+                        results["eodd_recon_std_bootstrapped"]
+                    )
+                    average_eop_recon_std_bootstrapped[attribute_name].append(
+                        results["eop_recon_std_bootstrapped"]
+                    )
+                    
                     all_results.append(
                         {
                             "model": "baseline",
@@ -470,6 +528,78 @@ def fairness_prediction(predictions, fairness_path):
                             "attribute": attribute_name,
                             "metric": "delta-EOP-bootstrapped",
                             "value": results["delta_eop_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-bootstrapped",
+                            "value": results["eop_recon_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-bootstrapped",
+                            "value": results["eodd_recon_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-std-err-bootstrapped",
+                            "value": results["eop_recon_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-std-err-bootstrapped",
+                            "value": results["eodd_recon_std_bootstrapped"]
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-bootstrapped",
+                            "value": results["eop_class_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-bootstrapped",
+                            "value": results["eodd_class_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-std-err-bootstrapped",
+                            "value": results["eop_class_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-std-err-bootstrapped",
+                            "value": results["eodd_class_std_bootstrapped"],
                         }
                     )
 
@@ -580,6 +710,79 @@ def fairness_prediction(predictions, fairness_path):
                         "attribute": attribute_name,
                         "metric": "delta-EODD-bootstrapped",
                         "value": np.mean(average_delta_EODD_bootstrapped[attribute_name]),
+                    }
+                )
+
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EOP-bootstrapped",
+                        "value": np.mean(average_eop_class_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EODD-bootstrapped",
+                        "value": np.mean(average_eodd_class_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EOP-std-err-bootstrapped",
+                        "value": np.mean(average_eop_class_std_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EODD-std-err-bootstrapped",
+                        "value": np.mean(average_eodd_class_std_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EOP-bootstrapped",
+                        "value": np.mean(average_eop_recon_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EODD-bootstrapped",
+                        "value": np.mean(average_eodd_recon_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EOP-std-err-bootstrapped",
+                        "value": np.mean(average_eop_recon_std_bootstrapped[attribute_name]),
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "average",
+                        "attribute": attribute_name,
+                        "metric": "EODD-std-err-bootstrapped",
+                        "value": np.mean(average_eodd_recon_std_bootstrapped[attribute_name]),
                     }
                 )
     evaluation_results = pd.DataFrame(all_results)

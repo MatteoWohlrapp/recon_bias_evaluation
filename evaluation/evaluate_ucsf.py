@@ -52,6 +52,10 @@ def bootstrap_fairness_classifier(
     # Prepare to store bootstrap differences:
     boot_deltas_eodd = []
     boot_deltas_eop = []
+    boot_baseline_eodd = []
+    boot_baseline_eop = []
+    boot_recon_eodd = []
+    boot_recon_eop = []
     # Bootstrap iterations:
     for i in range(n_iterations):
         boot_tpr_class = []
@@ -104,16 +108,24 @@ def bootstrap_fairness_classifier(
         ) / 2
         boot_delta_eodd = boot_eodd_recon - boot_eodd_class
         boot_deltas_eodd.append(boot_delta_eodd)
+        boot_baseline_eodd.append(boot_eodd_class)
+        boot_recon_eodd.append(boot_eodd_recon)
 
-        boot_delta_eop = (
-            max(boot_tpr_recon)
-            - min(boot_tpr_recon)
-            - (max(boot_tpr_class) - min(boot_tpr_class))
-        )
+        boot_eop_class = max(boot_tpr_class) - min(boot_tpr_class)
+        boot_eop_recon = max(boot_tpr_recon) - min(boot_tpr_recon)
+        boot_delta_eop = boot_eop_recon - boot_eop_class
+
         boot_deltas_eop.append(boot_delta_eop)
+        boot_baseline_eop.append(boot_eop_class)
+        boot_recon_eop.append(boot_eop_recon)
 
     boot_deltas_eodd = np.array(boot_deltas_eodd)
     boot_deltas_eop = np.array(boot_deltas_eop)
+    boot_baseline_eodd = np.array(boot_baseline_eodd)
+    boot_baseline_eop = np.array(boot_baseline_eop)
+    boot_recon_eodd = np.array(boot_recon_eodd)
+    boot_recon_eop = np.array(boot_recon_eop)
+    
     # Compute the one-tailed p-value:
     if observed_delta_eodd >= 0:
         p_value_eodd = np.mean(boot_deltas_eodd <= 0)
@@ -141,6 +153,14 @@ def bootstrap_fairness_classifier(
         "delta_eop_p_value": p_value_eop,
         "delta_eodd_std": std_eodd_delta,
         "delta_eop_std": std_eop_delta,
+        "eodd_class_bootstrapped": np.mean(boot_baseline_eodd),
+        "eop_class_bootstrapped": np.mean(boot_baseline_eop),
+        "eodd_recon_bootstrapped": np.mean(boot_recon_eodd),
+        "eop_recon_bootstrapped": np.mean(boot_recon_eop),
+        "eodd_class_std_bootstrapped": np.std(boot_baseline_eodd),
+        "eop_class_std_bootstrapped": np.std(boot_baseline_eop),
+        "eodd_recon_std_bootstrapped": np.std(boot_recon_eodd),
+        "eop_recon_std_bootstrapped": np.std(boot_recon_eop),
     }
 
     return results
@@ -362,6 +382,79 @@ def fairness_prediction_classifier(predictions):
                             "value": results["delta_eop_bootstrapped"],
                         }
                     )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-std-err-bootstrapped",
+                            "value": results["eodd_class_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-std-err-bootstrapped",
+                            "value": results["eop_class_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-bootstrapped",
+                            "value": results["eodd_recon_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": original_model,
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-bootstrapped",
+                            "value": results["eop_recon_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-std-err-bootstrapped",
+                            "value": results["eodd_class_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-std-err-bootstrapped",
+                            "value": results["eop_class_std_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EOP-bootstrapped",
+                            "value": results["eop_recon_bootstrapped"],
+                        }
+                    )
+                    all_results.append(
+                        {
+                            "model": "baseline",
+                            "interpreter": interpreter,
+                            "attribute": attribute_name,
+                            "metric": "EODD-bootstrapped",
+                            "value": results["eodd_recon_bootstrapped"],
+                        }
+                    )
+
     evaluation_results = pd.DataFrame(all_results)
     return evaluation_results
 
@@ -390,6 +483,11 @@ def bootstrap_fairness_segmentation(
     boot_delta_delta_dice = []
     boot_delta_ser = []
 
+    delta_dice_class_bootstrapped = []
+    delta_dice_recon_bootstrapped = []
+    ser_class_bootstrapped = []
+    ser_recon_bootstrapped = []
+
     for i in range(n_iterations):
         dice_class = []
         dice_recon = []
@@ -408,14 +506,24 @@ def bootstrap_fairness_segmentation(
         boot_ser_class = (1 - min(dice_class)) / (1 - max(dice_class))
         boot_ser_recon = (1 - min(dice_recon)) / (1 - max(dice_recon))
 
+        ser_class_bootstrapped.append(boot_ser_class)
+        ser_recon_bootstrapped.append(boot_ser_recon)
+
         boot_delta_dice_class = max(dice_class) - min(dice_class)
         boot_delta_dice_recon = max(dice_recon) - min(dice_recon)
+
+        delta_dice_class_bootstrapped.append(boot_delta_dice_class)
+        delta_dice_recon_bootstrapped.append(boot_delta_dice_recon)
 
         boot_delta_delta_dice.append(boot_delta_dice_recon - boot_delta_dice_class)
         boot_delta_ser.append(boot_ser_recon - boot_ser_class)
 
     boot_delta_delta_dice = np.array(boot_delta_delta_dice)
     boot_delta_ser = np.array(boot_delta_ser)
+    delta_dice_class_bootstrapped = np.array(delta_dice_class_bootstrapped)
+    delta_dice_recon_bootstrapped = np.array(delta_dice_recon_bootstrapped)
+    ser_class_bootstrapped = np.array(ser_class_bootstrapped)
+    ser_recon_bootstrapped = np.array(ser_recon_bootstrapped)
 
     if observed_delta_delta_dice >= 0:
         p_value_delta_delta_dice = np.mean(boot_delta_delta_dice <= 0)
@@ -443,6 +551,14 @@ def bootstrap_fairness_segmentation(
         "delta_ser_p_value": p_value_delta_ser,
         "delta_delta_dice_std": std_delta_delta_dice,
         "delta_ser_std": std_delta_ser,
+        "delta_dice_class_bootstrapped": delta_dice_class_bootstrapped.mean(),
+        "delta_dice_recon_bootstrapped": delta_dice_recon_bootstrapped.mean(),
+        "ser_class_bootstrapped": ser_class_bootstrapped.mean(),
+        "ser_recon_bootstrapped": ser_recon_bootstrapped.mean(),
+        "delta_dice_class_std_bootstrapped": np.std(delta_dice_class_bootstrapped),
+        "delta_dice_recon_std_bootstrapped": np.std(delta_dice_recon_bootstrapped),
+        "ser_class_std_bootstrapped": np.std(ser_class_bootstrapped),
+        "ser_recon_std_bootstrapped": np.std(ser_recon_bootstrapped),
     }
     return results
 
@@ -601,6 +717,78 @@ def fairness_prediction_segmentation(predictions):
                         "attribute": attribute_name,
                         "metric": "delta-SER-bootstrapped",
                         "value": results["delta_ser_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice-bootstrapped",
+                        "value": results["delta_dice_class_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice-bootstrapped",
+                        "value": results["delta_dice_recon_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER-bootstrapped",
+                        "value": results["ser_class_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER-bootstrapped",
+                        "value": results["ser_recon_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER-std-err-bootstrapped",
+                        "value": results["ser_class_std_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "SER-std-err-bootstrapped",
+                        "value": results["ser_recon_std_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": "baseline",
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice-std-err-bootstrapped",
+                        "value": results["delta_dice_class_std_bootstrapped"],
+                    }
+                )
+                all_results.append(
+                    {
+                        "model": original_model,
+                        "interpreter": "dice",
+                        "attribute": attribute_name,
+                        "metric": "delta-dice-std-err-bootstrapped",
+                        "value": results["delta_dice_recon_std_bootstrapped"],
                     }
                 )
     evaluation_results = pd.DataFrame(all_results)
