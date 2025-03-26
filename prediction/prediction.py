@@ -205,7 +205,7 @@ def setup_logger(name, save_dir, filename="log.txt"):
 
 
 def main():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--opt", type=str, required=True, help="Path to options YAML file."

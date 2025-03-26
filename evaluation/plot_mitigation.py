@@ -20,214 +20,6 @@ colors = {
     }
 }
 
-def plot_mitigation_chex(original_df, mitigated_df, results_dir, run_name):
-    interpreter_configs_original = {
-        "metrics": ["delta-EODD-bootstrapped", "delta-EOP-bootstrapped"],
-        "x_labels": ["EODD", "EOP"],
-    }
-
-    interpreters = [
-        "ec", "cardiomegaly", "lung-opacity", "lung-lesion", "edema",
-        "consolidation", "pneumonia", "atelectasis", "pneumothorax",
-        "pleural-effusion", "pleural-other", "fracture", "average",
-    ]
-
-    metric_labels = {
-        "ec": "Enlarged Cardiomediastinum",
-        "cardiomegaly": "Cardiomegaly",
-        "lung-opacity": "Lung Opacity",
-        "lung-lesion": "Lung Lesion",
-        "edema": "Edema",
-        "consolidation": "Consolidation",
-        "pneumonia": "Pneumonia",
-        "atelectasis": "Atelectasis",
-        "pneumothorax": "Pneumothorax",
-        "pleural-effusion": "Pleural Effusion",
-        "pleural-other": "Pleural Other",
-        "fracture": "Fracture",
-        "average": "Average",
-    }
-
-    model_labels = {"unet": "U-Net", "pix2pix": "Pix2Pix", "sde": "SDE"}
-
-    # Set plotting parameters
-    plt.rcParams.update({
-        "font.size": 24,
-        "axes.titlesize": 28,
-        "axes.labelsize": 20,
-        "xtick.labelsize": 18,
-        "ytick.labelsize": 18,
-        "legend.fontsize": 24,
-        "legend.title_fontsize": 24,
-    })
-
-    for interpreter in interpreters:
-        # Prepare data for current interpreter
-        orig_data_task = original_df[original_df["interpreter"] == interpreter].copy()
-        mitig_data_task = mitigated_df[mitigated_df["interpreter"] == interpreter].copy()
-        
-        # Create combined data for facet grid
-        plot_data = pd.DataFrame()
-        for metric in interpreter_configs_original["metrics"]:
-            orig_metric = orig_data_task[orig_data_task["metric"] == metric].copy()
-            orig_metric["type"] = "original"
-            mitig_metric = mitig_data_task[mitig_data_task["metric"] == metric].copy()
-            mitig_metric["type"] = "mitigated"
-            
-            plot_data = pd.concat([plot_data, orig_metric, mitig_metric])
-        
-        # Calculate y limits with padding
-        y_min = plot_data["value"].min()
-        y_max = plot_data["value"].max()
-        
-        # Round to nearest 0.05
-        y_min = np.floor(y_min / 0.05) * 0.05
-        y_max = np.ceil(y_max / 0.05) * 0.05
-        
-        g = sns.FacetGrid(
-            plot_data,
-            col="attribute",
-            col_order=["gender", "age", "ethnicity"],
-            height=6,
-            aspect=1.2,
-            ylim=(y_min, y_max),
-        )
-
-        def plot_bars(data, **kwargs):
-            ax = plt.gca()
-            unique_metrics = interpreter_configs_original["x_labels"]
-            n_metrics = len(unique_metrics)
-            n_models = len(model_labels)
-            width = 0.12
-            bar_gap = 0.005
-            
-            # Add horizontal grid lines
-            for y in np.arange(y_min, y_max + 0.05, 0.05):
-                ax.axhline(y=y, color="gray", linestyle="-", linewidth=0.5, alpha=0.2, zorder=0)
-            
-            # Handle y-axis visibility
-            if ax.get_position().x0 > 0.1:
-                ax.spines["left"].set_visible(False)
-                ax.yaxis.set_visible(False)
-            else:
-                ax.set_yticks(np.arange(y_min, y_max + 0.05, 0.05))
-            
-            # Plot bars for each model
-            for i, model in enumerate(model_labels.keys()):
-                x_positions = np.arange(n_metrics) * 0.8 + (i - (n_models - 1) / 2) * (width * 2 + bar_gap)
-                
-                # Get data for current model
-                model_data = data[data["model"] == model]
-                
-                # Plot original values
-                orig_values = []
-                for metric in interpreter_configs_original["metrics"]:
-                    mask = (model_data["type"] == "original") & (model_data["metric"] == metric)
-                    value = model_data[mask]["value"].iloc[0] if len(model_data[mask]) > 0 else 0
-                    orig_values.append(value)
-                
-                # Plot mitigated values
-                mitig_values = []
-                for metric in interpreter_configs_original["metrics"]:
-                    mask = (model_data["type"] == "mitigated") & (model_data["metric"] == metric)
-                    value = model_data[mask]["value"].iloc[0] if len(model_data[mask]) > 0 else 0
-                    mitig_values.append(value)
-                
-                # Determine colors based on model
-                if model == "unet":
-                    orig_color = colors["unet"]["significant"]
-                    mitig_color = colors["unet"]["marginal"]
-                elif model == "pix2pix":
-                    orig_color = colors["pix2pix"]["significant"]
-                    mitig_color = colors["pix2pix"]["marginal"]
-                else:  # sde
-                    orig_color = colors["sde"]["significant"]
-                    mitig_color = colors["sde"]["marginal"]
-
-                # Plot original bars
-                plt.bar(x_positions, orig_values, width=width, color=orig_color, 
-                       label=f"{model_labels[model]} Original", zorder=2)
-                # Plot mitigated bars
-                plt.bar(x_positions + width, mitig_values, width=width, color=mitig_color,
-                       label=f"{model_labels[model]} Mitigated", zorder=2)
-
-            plt.xticks(np.arange(n_metrics) * 0.8, unique_metrics)
-            plt.setp(ax.get_xticklabels(), weight="bold")
-
-        g.map_dataframe(plot_bars)
-
-        # Set titles and labels
-        col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
-        g.set_titles(template="{col_name}")
-
-        for ax, title in zip(g.axes.flat, [col_names[col] for col in g.col_names]):
-            ax.set_title(title, fontweight="bold", pad=20, fontsize=20)
-
-        # Add interpreter title
-        g.fig.suptitle(metric_labels[interpreter], fontweight="bold", fontsize=28, y=1.1)
-
-        # Add y-axis label to the leftmost plot
-        g.axes[0, 0].set_ylabel("Additional Bias", fontweight="bold")
-
-        # Remove individual legends
-        for ax in g.axes.flat:
-            if ax.get_legend() is not None:
-                ax.get_legend().remove()
-
-        # Save the plots
-        for fmt in ["eps", "pdf", "png"]:
-            save_dir = os.path.join(results_dir, "chex_mitigation", fmt)
-            os.makedirs(save_dir, exist_ok=True)
-            plt.savefig(
-                f"{save_dir}/mitigation_bias_{interpreter}.{fmt}",
-                bbox_inches="tight",
-                dpi=300,
-                format=fmt,
-            )
-        plt.close()
-
-    # Create separate legend figure
-    plt.figure(figsize=(12, 1))
-    ax = plt.gca()
-    ax.set_axis_off()
-
-    # Create legend elements for all combinations
-    legend_elements = []
-    for model in model_labels.keys():
-        if model == "unet":
-            orig_color = colors["unet"]["significant"]
-            mitig_color = colors["unet"]["marginal"]
-        elif model == "pix2pix":
-            orig_color = colors["pix2pix"]["significant"]
-            mitig_color = colors["pix2pix"]["marginal"]
-        else:  # sde
-            orig_color = colors["sde"]["significant"]
-            mitig_color = colors["sde"]["marginal"]
-            
-        legend_elements.extend([
-            plt.Rectangle((0, 0), 1, 1, color=orig_color, label=f"{model_labels[model]} Original"),
-            plt.Rectangle((0, 0), 1, 1, color=mitig_color, label=f"{model_labels[model]} Mitigated")
-        ])
-
-    # Create horizontal legend
-    plt.legend(handles=legend_elements, loc="center", ncol=len(legend_elements),
-              bbox_to_anchor=(0.5, 0.5))
-
-    # Save legend
-    for fmt in ["eps", "pdf", "png"]:
-        save_dir = os.path.join(results_dir, "chex_mitigation", fmt)
-        os.makedirs(save_dir, exist_ok=True)
-        plt.savefig(
-            f"{save_dir}/mitigation_bias_legend.{fmt}",
-            bbox_inches="tight",
-            dpi=300,
-            format=fmt,
-        )
-    plt.close()
-
-    # After all plots are created, generate the LaTeX grid
-    create_latex_grid(run_name, results_dir)
-
 def create_latex_grid(run_name, results_dir):
     """Create a LaTeX figure with a grid of all plots."""
     
@@ -300,7 +92,7 @@ def create_latex_grid(run_name, results_dir):
     with open(os.path.join(results_dir, "latex", "mitigation_grid.tex"), "w") as f:
         f.write("\n".join(latex_content))
 
-def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_dir, run_name):
+def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_dir, run_name):
     """
     Create a faceted bar plot showing the difference between reweighted vs. original and mitigated vs. original
     for EODD and EOP metrics across different models and attributes.
@@ -320,7 +112,7 @@ def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_d
     interpreters = [
         "ec", "cardiomegaly", "lung-opacity", "lung-lesion", "edema",
         "consolidation", "pneumonia", "atelectasis", "pneumothorax",
-        "pleural-effusion", "pleural-other", "fracture", "average",
+        "pleural-effusion", "pleural-other", "fracture", "average", "ttype", "tgrade"
     ]
     
     # Define labels for interpreters
@@ -338,6 +130,8 @@ def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_d
         "pleural-other": "Pleural Other",
         "fracture": "Fracture",
         "average": "Average",
+        "tgrade": "Tumor Grade",
+        "ttype": "Tumor Type",
     }
     
     # Define model labels
@@ -355,6 +149,8 @@ def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_d
     })
     
     for interpreter in interpreters:
+        if not interpreter in original_df["interpreter"].unique():
+            continue
         # Filter data for current interpreter
         orig_data = original_df[original_df["interpreter"] == interpreter].copy()
         reweight_data = reweighted_df[reweighted_df["interpreter"] == interpreter].copy()
@@ -396,11 +192,18 @@ def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_d
         y_min = np.floor(y_min / 0.05) * 0.05
         y_max = np.ceil(y_max / 0.05) * 0.05
         
+        # For tgrade and ttype, only show age and gender attributes
+        if interpreter in ["tgrade", "ttype"]:
+            plot_data = plot_data[plot_data["attribute"].isin(["gender", "age"])]
+            col_order = ["gender", "age"]
+        else:
+            col_order = ["gender", "age", "ethnicity"]
+        
         # Create facet grid
         g = sns.FacetGrid(
             plot_data,
             col="attribute",
-            col_order=["gender", "age", "ethnicity"],
+            col_order=col_order,
             height=6,
             aspect=1.2,
             ylim=(y_min, y_max),
@@ -545,3 +348,151 @@ def plot_combined_mitigation(original_df, reweighted_df, mitigated_df, results_d
     plt.close()
 
     create_latex_grid(run_name, results_dir)
+
+
+
+def performance_evaluation_ucsf_table(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
+    pass
+
+def performance_evaluation_chex_table(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
+    # create new df object empty 
+    results = pd.DataFrame()
+
+    # Safely add rows from each dataframe
+    def add_df_rows(df, mitigation_type):
+        df_copy = df.copy()
+        df_copy["mitigation"] = mitigation_type
+        return df_copy
+    
+    # Combine all the dataframes
+    dfs_to_combine = [
+        add_df_rows(csv_standard, "standard"),
+        add_df_rows(csv_eodd, "eodd"),
+        add_df_rows(csv_reweighted, "re"),
+        add_df_rows(csv_adv, "adv")
+    ]
+    
+    # Concatenate all dataframes at once
+    results = pd.concat(dfs_to_combine, ignore_index=True)
+    
+    latex_path = "latex/templates/chex_performance_mitigation.tex"
+
+    # Color definitions for positive and negative values
+    colors = {
+        "negative": {
+            "significant": "E6C321",  # change > 5%
+            "marginal": "F1D892",  # 5% <= change
+        },
+        "positive": {
+            "significant": "3089A2",  # change > 5%
+            "marginal": "93C1C9",  # 5% <= change
+        },
+    }
+
+    models = ["baseline", "unet", "pix2pix", "sde"]
+
+    metrics = [
+        "ec",
+        "cardiomegaly",
+        "lung-opacity",
+        "lung-lesion",
+        "edema",
+        "consolidation",
+        "pneumonia",
+        "atelectasis",
+        "pneumothorax",
+        "pleural-effusion",
+        "pleural-other",
+        "fracture",
+        "average",
+        "psnr",
+        "lpips"
+    ]
+
+    mitigations = ["eodd", "re", "adv"]
+
+    # Read the LaTeX file
+    file_name = latex_path.split("/")[-1].split(".")[0]
+    with open(latex_path, "r") as file:
+        latex_content = file.read()
+
+    for metric in metrics:
+        for model in models:
+            if model == "baseline":
+                key = f"{model}-{metric}"
+
+                filtered_results = results[
+                        (results["metric"] == metric)
+                        & (results["model"] == model)
+                    ]
+
+                if len(filtered_results) == 0:
+                    continue
+
+                result = filtered_results["value"].iloc[0]
+
+                latex_content = latex_content.replace(key, f"{result:.3f}")
+
+            else:
+                for mitigation in mitigations:
+                    key = f"{model}-{metric}-{mitigation}"
+
+                    filtered_results = results[
+                        (results["metric"] == metric)
+                        & (results["model"] == model)
+                        & (results["mitigation"] == mitigation)
+                    ]
+
+                    if metric == "psnr" or metric == "lpips":
+                        filter_model = model 
+                    else: 
+                        filter_model = "baseline"
+
+                    baseline_filtered = results[
+                        (results["metric"] == metric)
+                        & (results["model"] == filter_model)
+                        & (results["mitigation"] == "standard")
+                    ]
+
+                    # Skip if either filtered results or baseline results don't exist
+                    if len(filtered_results) == 0 or len(baseline_filtered) == 0:
+                        # Replace with empty cell if no data
+                        # current_content = current_content.replace(key, "-")
+                        print(key)
+                        continue
+                    
+                    if len(filtered_results) > 1:
+                        raise ValueError(f"Multiple results found for {key}")
+
+                    baseline_result = baseline_filtered["value"].iloc[0]
+                    result = filtered_results["value"].iloc[0]
+
+                    percent_change = (result - baseline_result) / baseline_result
+
+                    # Determine color based on percent change
+                    color = None
+                    if percent_change > 0:
+                        if percent_change > 0.1:
+                            color = colors["positive"]["significant"]
+                        elif percent_change > 0.05:
+                            color = colors["positive"]["marginal"]
+                    else:
+                        if percent_change < -0.1:
+                            color = colors["negative"]["significant"]
+                        elif percent_change < -0.05:
+                            color = colors["negative"]["marginal"]
+
+                    # Format the value
+                    formatted_value = f"{result:.3f}"
+
+                    # Add color if significant
+                    if color:
+                        formatted_value = (
+                            f"\\cellcolor[HTML]{{{color}}}{formatted_value}"
+                        )
+
+                    latex_content = latex_content.replace(key, formatted_value)
+
+    # Write to latex
+    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+        file.write(latex_content)

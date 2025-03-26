@@ -1,0 +1,38 @@
+\begin{table}[]
+    \centering
+    \caption{CheXpert image metrics and prediction performance when applied to the reconstructed images. Baseline is the prediction on the ground truth images; EC: Enlarged Cardiomediastinum}\label{tab:chex_perf}
+    
+    \begin{tabular}{ll|cccccccccc}
+        \hline
+        \multicolumn{2}{c|}{}                                   & \multicolumn{1}{c|}{}                                    & \multicolumn{3}{c|}{\textbf{U-Net}}                             & \multicolumn{3}{c|}{\textbf{Pix2Pix}}                           & \multicolumn{3}{c}{\textbf{SDE}}           \\ \cline{4-12} 
+        \multicolumn{2}{c|}{\multirow{-2}{*}{\textbf{Metrics}}} & \multicolumn{1}{c|}{\multirow{-2}{*}{\textbf{Baseline}}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\ \hline
+
+    \multirow{2}{*}{\textbf{AUROC}} 
+    & \textbf{Tumor Type}  & baseline-tumor-type 
+        & unet-tumor-type-re & unet-tumor-type-eodd & unet-tumor-type-adv 
+        & pix2pix-tumor-type-re & pix2pix-tumor-type-eodd & pix2pix-tumor-type-adv 
+        & sde-tumor-type-re & sde-tumor-type-eodd & sde-tumor-type-adv \\
+    & \textbf{Tumor Grade} & baseline-tumor-grade 
+        & unet-tumor-grade-re & unet-tumor-grade-eodd & unet-tumor-grade-adv 
+        & pix2pix-tumor-grade-re & pix2pix-tumor-grade-eodd & pix2pix-tumor-grade-adv 
+        & sde-tumor-grade-re & sde-tumor-grade-eodd & sde-tumor-grade-adv \\ \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{Dice}} 
+        & \cellcolor[HTML]{C0C0C0} 
+        & unet-dice-re & unet-dice-eodd & unet-dice-adv 
+        & pix2pix-dice-re & pix2pix-dice-eodd & pix2pix-dice-adv 
+        & sde-dice-re & sde-dice-eodd & sde-dice-adv \\ \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{PSNR}} 
+        & \cellcolor[HTML]{C0C0C0} 
+        & unet-psnr-re & unet-psnr-eodd & unet-psnr-adv 
+        & pix2pix-psnr-re & pix2pix-psnr-eodd & pix2pix-psnr-adv 
+        & sde-psnr-re & sde-psnr-eodd & sde-psnr-adv \\ \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{LPIPS}} 
+        & \cellcolor[HTML]{C0C0C0} 
+        & unet-lpips-re & unet-lpips-eodd & unet-lpips-adv 
+        & pix2pix-lpips-re & pix2pix-lpips-eodd & pix2pix-lpips-adv 
+        & sde-lpips-re & sde-lpips-eodd & sde-lpips-adv \\ \hline
+\end{tabular}
+\end{table}

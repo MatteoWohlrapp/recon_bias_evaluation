@@ -40,6 +40,7 @@ class UcsfDataset(Dataset):
         self.upper_slice = opt.get("upper_slice", 130)
         self.split = "test"
         self.num_rays = opt.get("num_rays", 140)
+        print(f"num_rays: {self.num_rays}")
 
         # Load metadata
         self.metadata = self._load_metadata()

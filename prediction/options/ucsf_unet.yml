@@ -1,5 +1,5 @@
-name: ucsf_unet_8_fairness_10
-results_path: /lotterlab/users/matteo/predictions_fairness
+name: unet_fairness-ucsf-08-l0005-t03-ce05
+results_path: /lotterlab/users/matteo/predictions-EODD-fairness
 batch_size: 8
 num_workers: 2
 
@@ -17,7 +17,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-ucsf-08-001_20250213_135512/checkpoints/unet-fairness-ucsf-08-001_20250213_135512_epoch_10.pth
+  model_path: /lotterlab/users/matteo/models/EODD-Fairness/unet-fairness-ucsf-08-l0005-t03-ce05_20250311_105925/checkpoints/unet-fairness-ucsf-08-l0005-t03-ce05_20250311_105925_epoch_2_best.pth
 
 task_models: 
   name: ucsf

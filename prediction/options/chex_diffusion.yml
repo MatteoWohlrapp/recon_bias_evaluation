@@ -1,15 +1,15 @@
-name: chex_diffusion_10000_fairness_0001_30
-results_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/prediction
+name: chex_diffusion_10000_reweighted_20
+results_path: /lotterlab/users/matteo/predictions_reweighted
 batch_size: 16
 num_workers: 4
 
 datasets:
   name: chex
-  csv_path_A: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_10000.csv
-  csv_path_B: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chexpert-metadata-processed.csv
-  dataroot_A: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
-  dataroot_B: /vol/miltank/datasets/CheXpert 
-  processed_image_root: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/processed/chex/chex_SDE-10000-fairness-30-2
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
+  dataroot_B: /lotterlab/datasets/
+  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/chex/chex_SDE-10000-reweighted-20
   split: test
 
 models:
@@ -17,4 +17,4 @@ models:
 
 task_models: 
   name: chexpert-classifier
-  path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/chex-densenet-class_norm01-best.pt
+  path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt

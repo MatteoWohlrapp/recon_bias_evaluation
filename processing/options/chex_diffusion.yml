@@ -1,7 +1,7 @@
-name: chex_SDE-3000-65
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/chex
-batch_size: 32
-num_workers: 8
+name: chex_SDE-10000-reweighted-20
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/chex
+batch_size: 16
+num_workers: 4
 
 paths:
   recon_bias: /lotterlab/users/matteo/code/recon_bias
@@ -10,7 +10,7 @@ paths:
 
 datasets:
   name: chex
-  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_3000.csv
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
   csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
   dataroot_B: /lotterlab/datasets/
@@ -45,5 +45,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Noise/Chex/Diffusion/SDE-3000-latest_G.pth
+  pretrain_model_G: /lotterlab/users/matteo/models/Reweighted/Chex/chex10000-sde-reweight/models/20_G.pth
   strict_load: True

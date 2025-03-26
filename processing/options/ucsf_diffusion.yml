@@ -1,6 +1,6 @@
-name: ucsf_SDE-8-fairness-160
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf
-batch_size: 8
+name: ucsf_SDE-8-reweight-50
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/ucsf
+batch_size: 4
 num_workers: 2
 
 paths:
@@ -48,5 +48,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/code/image-restoration-sde/experiments/deblurring/ucsf-sde-8-fairness-0001/models/160_G.pth
+  pretrain_model_G: /lotterlab/users/matteo/models/Reweighted/UCSF/ucsf-sde-8-reweight/models/50_G.pth
   strict_load: True

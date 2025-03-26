@@ -1,0 +1,19 @@
+
+name: ucsf-evaluation_reweighting
+results_path: /lotterlab/users/matteo/evaluations_reweighted
+
+mode: ucsf
+
+predictions: 
+    - acceleration: 8
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions_reweighted/ucsf_unet_8_reweighted_e10_20250310_095836/ucsf_unet_8_reweighted_e10_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions_reweighted/ucsf_gan_8_reweighted_100_20250227_170826/ucsf_gan_8_reweighted_100_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions_reweighted/ucsf_diffusion_8_reweighted_50_20250310_091128/ucsf_diffusion_8_reweighted_50_results.csv'
+      fairness: True
