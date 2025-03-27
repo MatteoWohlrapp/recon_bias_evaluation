@@ -56,14 +56,14 @@ def create_latex_grid(run_name, results_dir):
         interpreter2 = interpreters[i+1]
         
         # Add first plot
-        latex_content.append(r"        \begin{subfigure}[t]{0.45\textwidth}")
+        latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
         latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter1}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
         latex_content.append(r"        &")
         
         # Add second plot
-        latex_content.append(r"        \begin{subfigure}[t]{0.45\textwidth}")
+        latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
         latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter2}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
@@ -78,7 +78,7 @@ def create_latex_grid(run_name, results_dir):
     
     # Add average plot centered below the grid
     latex_content.append(r"    \vspace{0.5cm}")
-    latex_content.append(r"    \begin{subfigure}[t]{0.45\textwidth}")
+    latex_content.append(r"    \begin{subfigure}[t]{0.48\textwidth}")
     latex_content.append(r"        \centering")
     latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_average.pdf" + "}")
     latex_content.append(r"    \end{subfigure}")
@@ -92,15 +92,16 @@ def create_latex_grid(run_name, results_dir):
     with open(os.path.join(results_dir, "latex", "mitigation_grid.tex"), "w") as f:
         f.write("\n".join(latex_content))
 
-def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_dir, run_name):
+def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, results_dir, run_name):
     """
-    Create a faceted bar plot showing the difference between reweighted vs. original and mitigated vs. original
+    Create a faceted bar plot showing the difference between different mitigation approaches vs. original
     for EODD and EOP metrics across different models and attributes.
     
     Args:
         original_df: DataFrame with original results
         reweighted_df: DataFrame with reweighted results
-        mitigated_df: DataFrame with mitigated results
+        eodd_df: DataFrame with EODD mitigation results
+        adv_df: DataFrame with adversarial mitigation results
         results_dir: Directory to save the plots
         run_name: Name of the run for organizing output files
     """
@@ -137,6 +138,25 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
     # Define model labels
     model_labels = {"unet": "U-Net", "pix2pix": "Pix2Pix", "sde": "SDE"}
     
+    # Updated color scheme with three mitigation types per model
+    colors = {
+        "pix2pix": {
+            "reweighted": "#F1D892",  # Light yellow
+            "eodd": "#E6C321",        # Yellow
+            "adv": "#B39700"          # Dark yellow/gold
+        },
+        "unet": {
+            "reweighted": "#93C1C9",  # Light blue
+            "eodd": "#3089A2",        # Blue
+            "adv": "#0A5C7A"          # Dark blue
+        },
+        "sde": {
+            "reweighted": "#FF9999",  # Light red
+            "eodd": "#EB0007",        # Red
+            "adv": "#B30005"          # Dark red
+        }
+    }
+    
     # Set plotting parameters
     plt.rcParams.update({
         "font.size": 24,
@@ -154,9 +174,10 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
         # Filter data for current interpreter
         orig_data = original_df[original_df["interpreter"] == interpreter].copy()
         reweight_data = reweighted_df[reweighted_df["interpreter"] == interpreter].copy()
-        mitig_data = mitigated_df[mitigated_df["interpreter"] == interpreter].copy()
+        eodd_data = eodd_df[eodd_df["interpreter"] == interpreter].copy()
+        adv_data = adv_df[adv_df["interpreter"] == interpreter].copy()
         
-        if len(orig_data) == 0 or len(reweight_data) == 0 or len(mitig_data) == 0:
+        if len(orig_data) == 0 or len(reweight_data) == 0 or len(eodd_data) == 0 or len(adv_data) == 0:
             continue  # Skip if no data for this interpreter
         
         # Create combined data for facet grid
@@ -171,13 +192,18 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
             reweight_metric["type"] = "reweighted"
             reweight_metric["diff_value"] = reweight_metric["value"] - orig_metric["value"].values
             
-            # Get mitigated data and calculate difference
-            mitig_metric = mitig_data[mitig_data["metric"] == metric].copy()
-            mitig_metric["type"] = "mitigated"
-            mitig_metric["diff_value"] = mitig_metric["value"] - orig_metric["value"].values
+            # Get EODD data and calculate difference
+            eodd_metric = eodd_data[eodd_data["metric"] == metric].copy()
+            eodd_metric["type"] = "eodd"
+            eodd_metric["diff_value"] = eodd_metric["value"] - orig_metric["value"].values
+            
+            # Get adversarial data and calculate difference
+            adv_metric = adv_data[adv_data["metric"] == metric].copy()
+            adv_metric["type"] = "adv"
+            adv_metric["diff_value"] = adv_metric["value"] - orig_metric["value"].values
             
             # Add to plot data
-            plot_data = pd.concat([plot_data, reweight_metric, mitig_metric])
+            plot_data = pd.concat([plot_data, reweight_metric, eodd_metric, adv_metric])
         
         # Add metric_type for easier plotting
         plot_data["metric_type"] = plot_data["metric"].apply(
@@ -214,8 +240,9 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
             unique_metrics = ["EODD", "EOP"]
             n_metrics = len(unique_metrics)
             n_models = len(model_labels)
-            width = 0.12
+            width = 0.08  # Narrower bars to accommodate more
             bar_gap = 0.005
+            group_width = width * 3 + bar_gap * 2  # Width of all 3 bars for one model
             
             # Add horizontal grid lines
             for y in np.arange(y_min, y_max + 0.05, 0.05):
@@ -237,42 +264,28 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
                 if len(model_data) == 0:
                     continue
                 
-                x_positions = np.arange(n_metrics) * 0.8 + (i - (n_models - 1) / 2) * (width * 2 + bar_gap)
+                # Base position for this model's group of bars
+                x_base = np.arange(n_metrics) * 0.9 + (i - (n_models - 1) / 2) * (group_width + bar_gap)
                 
-                # Get reweighted values
-                reweight_values = []
-                for metric_type in unique_metrics:
-                    mask = (model_data["type"] == "reweighted") & (model_data["metric_type"] == metric_type)
-                    value = model_data[mask]["diff_value"].iloc[0] if len(model_data[mask]) > 0 else 0
-                    reweight_values.append(value)
-                
-                # Get mitigated values
-                mitig_values = []
-                for metric_type in unique_metrics:
-                    mask = (model_data["type"] == "mitigated") & (model_data["metric_type"] == metric_type)
-                    value = model_data[mask]["diff_value"].iloc[0] if len(model_data[mask]) > 0 else 0
-                    mitig_values.append(value)
-                
-                # Determine colors based on model
-                if model == "unet":
-                    reweight_color = colors["unet"]["marginal"]
-                    mitig_color = colors["unet"]["significant"]
-                elif model == "pix2pix":
-                    reweight_color = colors["pix2pix"]["marginal"]
-                    mitig_color = colors["pix2pix"]["significant"]
-                else:  # sde
-                    reweight_color = colors["sde"]["marginal"]
-                    mitig_color = colors["sde"]["significant"]
-                
-                # Plot reweighted bars
-                plt.bar(x_positions, reweight_values, width=width, color=reweight_color,
-                       label=f"{model_labels[model]} Reweighted", zorder=2)
-                
-                # Plot mitigated bars
-                plt.bar(x_positions + width, mitig_values, width=width, color=mitig_color,
-                       label=f"{model_labels[model]} Mitigated", zorder=2)
+                # Get values for each mitigation type
+                for j, mitigation_type in enumerate(["reweighted", "eodd", "adv"]):
+                    values = []
+                    for metric_type in unique_metrics:
+                        mask = (model_data["type"] == mitigation_type) & (model_data["metric_type"] == metric_type)
+                        value = model_data[mask]["diff_value"].iloc[0] if len(model_data[mask]) > 0 else 0
+                        values.append(value)
+                    
+                    # Position for this specific bar within the model's group
+                    x_positions = x_base + j * (width + bar_gap)
+                    
+                    # Get color for this model and mitigation type
+                    bar_color = colors[model][mitigation_type]
+                    
+                    # Plot bars
+                    plt.bar(x_positions, values, width=width, color=bar_color,
+                           label=f"{model_labels[model]} {mitigation_type.capitalize()}", zorder=2)
             
-            plt.xticks(np.arange(n_metrics) * 0.8, unique_metrics)
+            plt.xticks(np.arange(n_metrics) * 0.9, unique_metrics)
             plt.setp(ax.get_xticklabels(), weight="bold")
         
         g.map_dataframe(plot_bars)
@@ -308,31 +321,34 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
         plt.close()
     
     # Create separate legend figure
-    plt.figure(figsize=(12, 1.5))
+    plt.figure(figsize=(14, 2.5))
     ax = plt.gca()
     ax.set_axis_off()
-    
-    # Define reweighted and mitigated colors for legend
-    reweighted_color = "#CCCCCC"  # Light gray
-    mitigated_color = "#666666"   # Dark gray
     
     # Create legend elements
     legend_elements = []
     
-    # Add model colors
+    # Add model elements
     for model in model_labels.keys():
+        # Add model name
         legend_elements.append(
-            plt.Rectangle((0, 0), 1, 1, color=colors[model]["significant"], label=f"{model_labels[model]}")
+            plt.Rectangle((0, 0), 1, 1, fill=False, edgecolor='none', 
+                         label=f"{model_labels[model]}:")
         )
+        
+        # Add mitigation types for this model
+        for mitigation_type, label in [
+            ("reweighted", "Reweighted"), 
+            ("eodd", "EODD"), 
+            ("adv", "Adversarial")
+        ]:
+            legend_elements.append(
+                plt.Rectangle((0, 0), 1, 1, color=colors[model][mitigation_type], 
+                             label=label)
+            )
     
-    # Add reweighted and mitigated indicators
-    legend_elements.extend([
-        plt.Rectangle((0, 0), 1, 1, color=reweighted_color, label="Reweighted"),
-        plt.Rectangle((0, 0), 1, 1, color=mitigated_color, label="Mitigated")
-    ])
-    
-    # Create horizontal legend
-    plt.legend(handles=legend_elements, loc="center", ncol=len(legend_elements),
+    # Create legend with 4 columns (model name + 3 mitigation types for each model)
+    plt.legend(handles=legend_elements, loc="center", ncol=len(legend_elements)//3,
               bbox_to_anchor=(0.5, 0.5))
     
     # Save legend
@@ -347,6 +363,7 @@ def plot_mitigation_combined(original_df, reweighted_df, mitigated_df, results_d
         )
     plt.close()
 
+    # Create the LaTeX grid
     create_latex_grid(run_name, results_dir)
 
 
