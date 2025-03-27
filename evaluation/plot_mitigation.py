@@ -325,32 +325,44 @@ def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, result
     ax = plt.gca()
     ax.set_axis_off()
     
+    # Define gray tones for mitigation types (from light to dark)
+    mitigation_colors = {
+        "reweighted": "#CCCCCC",  # Light gray
+        "eodd": "#888888",        # Medium gray
+        "adv": "#444444"          # Dark gray
+    }
+
     # Create legend elements
     legend_elements = []
-    
-    # Add model elements
-    for model in model_labels.keys():
-        # Add model name
+
+    # Order the models as requested: unet, pix2pix, sde
+    ordered_models = ["unet", "pix2pix", "sde"]
+
+    # First add model elements with their middle color
+    for model in ordered_models:
         legend_elements.append(
-            plt.Rectangle((0, 0), 1, 1, fill=False, edgecolor='none', 
-                         label=f"{model_labels[model]}:")
+            plt.Rectangle((0, 0), 1, 1, color=colors[model]["eodd"], 
+                         label=f"{model_labels[model]}")
         )
-        
-        # Add mitigation types for this model
-        for mitigation_type, label in [
-            ("reweighted", "Reweighted"), 
-            ("eodd", "EODD"), 
-            ("adv", "Adversarial")
-        ]:
-            legend_elements.append(
-                plt.Rectangle((0, 0), 1, 1, color=colors[model][mitigation_type], 
-                             label=label)
-            )
-    
-    # Create legend with 4 columns (model name + 3 mitigation types for each model)
-    plt.legend(handles=legend_elements, loc="center", ncol=len(legend_elements)//3,
+
+    # Add a small space in legend
+    legend_elements.append(plt.Rectangle((0, 0), 1, 1, fill=False, edgecolor='none', label=""))
+
+    # Then add mitigation types with gray tones (from light to dark)
+    for mitigation_type, label in [
+        ("reweighted", "Reweighted"),  # Light
+        ("eodd", "EODD"),              # Medium
+        ("adv", "Adversarial")         # Dark
+    ]:
+        legend_elements.append(
+            plt.Rectangle((0, 0), 1, 1, color=mitigation_colors[mitigation_type], 
+                         label=label)
+        )
+
+    # Create legend with all elements in a single row
+    plt.legend(handles=legend_elements, loc="center", ncol=len(legend_elements),
               bbox_to_anchor=(0.5, 0.5))
-    
+
     # Save legend
     for fmt in ["eps", "pdf", "png"]:
         save_dir = os.path.join(results_dir, f"{run_name}_mitigation_comparison", fmt)
