@@ -916,3 +916,311 @@ def plot_combined_fairness_summary(combined_results, results_dir):
 
     with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
         file.write(new_latex_content)
+
+def create_shared_legend(results_dir):
+    """
+    Create a shared legend figure for the fairness performance scatter plots.
+    
+    Args:
+        results_dir: Directory to save the legend
+    """
+    # Model and dataset name mappings
+    model_map = {
+        "unet": "U-Net",
+        "pix2pix": "Pix2Pix",
+        "sde": "SDE"
+    }
+
+    dataset_map = {
+        "chex": "CheXpert",
+        "ucsf": "UCSF"
+    }
+    
+    # Define colors for models
+    model_colors = {
+        "pix2pix": "#E6C321",  # Yellow
+        "unet": "#3089A2",     # Blue
+        "sde": "#EB0007"       # Red
+    }
+    
+    # Define dataset styles (outline or filled)
+    dataset_markers = {
+        "chex": "s", 
+        "ucsf": "o" 
+    }
+
+    # Create figure for legend
+    plt.figure(figsize=(10, 6))
+    ax = plt.gca()
+    ax.set_axis_off()  # Hide axes
+    
+    # Create legend elements
+    legend_elements = []
+    
+    # Model colors
+    for model in sorted(model_colors.keys()):
+        legend_elements.append(
+            plt.Line2D([0], [0], marker='o', color='w', 
+                      markerfacecolor=model_colors[model], markersize=15, 
+                      label=f"Model: {model_map.get(model, model)}")
+        )
+    
+    # Dataset styles
+    for dataset in sorted(dataset_markers.keys()):
+        legend_elements.append(
+            plt.Line2D([0], [0], marker=dataset_markers[dataset], color='gray', 
+                      markersize=15, label=f"Dataset: {dataset_map.get(dataset, dataset)}")
+        )
+    
+    # Example size indicators
+    legend_elements.append(
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
+                  markersize=6, label="Fairness: Low")
+    )
+    legend_elements.append(
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
+                  markersize=10, label="Fairness: Medium")
+    )
+    legend_elements.append(
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
+                  markersize=15, label="Fairness: High")
+    )
+    
+    # Create the legend
+    plt.legend(handles=legend_elements, loc='center', frameon=True, 
+              fancybox=True, shadow=True, ncol=1, fontsize=18)
+    
+    # Save the legend
+    for fmt in ["eps", "pdf", "png"]:
+        os.makedirs(os.path.join(results_dir, fmt), exist_ok=True)
+        plt.savefig(
+            os.path.join(results_dir, fmt, f"fairness_performance_legend.{fmt}"),
+            bbox_inches="tight",
+            dpi=300,
+            format=fmt,
+        )
+    
+    plt.close()
+
+def fairness_performance_scatter(df, results_dir, mitigation_type="reweighting", fairness_metric="EODD", attribute="age"):
+    """
+    Create a scatter plot showing the trade-off between fairness and performance changes.
+    
+    Args:
+        df: DataFrame with the following columns:
+            - fairness_percent: Percentage change in fairness
+            - fairness_val: Absolute fairness value
+            - performance_percent: Percentage change in performance
+            - dataset: Dataset type (string)
+            - model: Model name (string)
+        results_dir: Directory to save the plots
+    """
+
+    # Set plotting parameters
+    plt.rcParams.update({
+        "font.size": 24,
+        "axes.titlesize": 28,
+        "axes.labelsize": 20,
+        "xtick.labelsize": 18,
+        "ytick.labelsize": 18,
+        "legend.fontsize": 18,
+        "legend.title_fontsize": 18,
+    })
+
+    # Define colors for models (using the existing color scheme)
+    model_colors = {
+        "pix2pix": "#E6C321",  # Yellow
+        "unet": "#3089A2",     # Blue
+        "sde": "#EB0007"       # Red
+    }
+    
+    # Define dataset styles (outline or filled)
+    dataset_markers = {
+        "chex": "s", 
+        "ucsf": "o" 
+    }
+    
+    # Create figure and axis
+    plt.figure(figsize=(12, 10))
+    
+    # Normalize fairness values for marker size
+    min_fairness = df['fairness_val'].min()
+    max_fairness = df['fairness_val'].max()
+    
+    # Calculate normalized sizes between 50 and 300
+    def normalize_size(val):
+        if max_fairness == min_fairness:  # Handle case where all values are the same
+            return 150
+        return 50 + 250 * (val - min_fairness) / (max_fairness - min_fairness)
+    
+    # Add points to the plot
+    for idx, row in df.iterrows():
+        # Get corresponding properties for this point
+        model = row['model']
+        dataset = row['dataset']
+        fairness_pct = row['fairness_percent']
+        performance_pct = row['performance_percent']
+        fairness_val = row['fairness_val']
+        
+        # Get color, marker, and size
+        color = model_colors.get(model, "#777777")  # Grey default if model not found
+        marker = dataset_markers.get(dataset, "D")  # Diamond default if dataset not found
+        size = normalize_size(fairness_val)
+                
+        # Plot the point
+        scatter = plt.scatter(
+            performance_pct, fairness_pct, 
+            s=size, 
+            marker=marker, 
+            color=color
+        )
+    
+    # Add reference lines
+    plt.axhline(y=0, color='gray', linestyle='-', linewidth=1, alpha=0.6)
+    plt.axvline(x=0, color='gray', linestyle='-', linewidth=1, alpha=0.6)
+    
+    # Set labels and title
+    plt.xlabel("Performance Change (%)", fontweight="bold")
+    plt.ylabel("Fairness Change (%)", fontweight="bold")
+    
+    # Add grid
+    plt.grid(True, linestyle='--', alpha=0.3)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save plots
+    for fmt in ["eps", "pdf", "png"]:
+        os.makedirs(os.path.join(results_dir, fmt), exist_ok=True)
+        plt.savefig(
+            os.path.join(results_dir, fmt, f"fairness_performance_tradeoff_{mitigation_type}_{fairness_metric}_{attribute}.{fmt}"),
+            bbox_inches="tight",
+            dpi=300,
+            format=fmt,
+        )
+    
+    plt.close()
+
+
+def _get_performance_change(df, model, metric, dataset, mitigation): 
+    mitigation_df = df[
+        (df["model"] == model)
+        & (df["dataset"] == dataset)
+        & (df["metric"] == metric)
+        & (df["mitigation"] == mitigation)
+    ]
+
+    standard_df = df[
+        (df["model"] == model)
+        & (df["dataset"] == dataset)
+        & (df["metric"] == metric)
+        & (df["mitigation"] == "standard")
+    ]
+
+    if len(mitigation_df) == 0 or len(standard_df) == 0:
+        #print(f"No data found for model: {model}, dataset: {dataset}, metric: {metric}, mitigation: {mitigation}")
+        return None
+
+    mitigation_value = mitigation_df["value"].iloc[0]
+    standard_value = standard_df["value"].iloc[0]
+
+    # return the percentage change
+    return (mitigation_value - standard_value) / standard_value * 100
+    
+
+def _get_fairness_change(df, model, interpreter, attribute, metric, dataset, mitigation): 
+    mitigation_df = df[
+        (df["model"] == model)
+        & (df["dataset"] == dataset)
+        & (df["metric"] == metric)
+        & (df["mitigation"] == mitigation)
+        & (df["attribute"] == attribute)
+        & (df["interpreter"] == interpreter)
+    ]
+
+    standard_df = df[
+        (df["model"] == model)
+        & (df["dataset"] == dataset)
+        & (df["metric"] == metric)
+        & (df["mitigation"] == "standard")
+        & (df["attribute"] == attribute)
+        & (df["interpreter"] == interpreter)
+    ]
+    if len(mitigation_df) == 0 or len(standard_df) == 0:
+        #print(f"No data found for model: {model}, dataset: {dataset}, metric: {metric}, mitigation: {mitigation}, attribute: {attribute}, interpreter: {interpreter}")
+        return None, None
+
+    mitigation_value = mitigation_df["value"].iloc[0]
+    standard_value = standard_df["value"].iloc[0]
+
+    return (mitigation_value - standard_value) / standard_value * 100, mitigation_value
+
+def plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir):
+    """
+    Plot the trade-off between fairness and performance changes.
+    
+    Args:
+        performance_df: DataFrame with performance data
+        fairness_df: DataFrame with fairness data
+        results_dir: Directory to save the plots
+    """
+    performance_df_og = performance_df.copy()
+    fairness_df_og = fairness_df.copy()
+    results_dir = os.path.join(results_dir, "fairness_performance_tradeoff")
+    os.makedirs(results_dir, exist_ok=True)
+
+    # Create a shared legend first
+    create_shared_legend(results_dir)
+
+    fairness_metrics = ["EODD-bootstrapped", "EOP-bootstrapped"]
+    interpreters = [
+        "ec", "cardiomegaly", "lung-opacity", "lung-lesion", "edema",
+        "consolidation", "pneumonia", "atelectasis", "pneumothorax",
+        "pleural-effusion", "pleural-other", "fracture", "ttype", "tgrade"
+    ]
+    attributes = [
+        "gender", "age", "ethnicity"
+    ]
+
+    for mitigation in performance_df["mitigation"].unique():
+        if mitigation == "standard": 
+            continue
+
+        for fairness_metric in fairness_metrics:
+            performance_df = performance_df_og.copy()
+
+            for attribute in attributes:
+                # at the end of this loop we call the scatter plot function
+                fairness_df = fairness_df_og.copy()
+
+                # Create a list to collect rows instead of using append
+                rows_list = []
+
+                for model in performance_df["model"].unique():
+                    if model == "baseline":
+                        continue
+                    for dataset in performance_df["dataset"].unique():
+                        for interpreter in interpreters:
+                            performance_change = _get_performance_change(performance_df, model, interpreter, dataset, mitigation)
+                            fairness_change, fairness_val = _get_fairness_change(fairness_df, model, interpreter, attribute, fairness_metric, dataset, mitigation)
+
+                            if performance_change is None or fairness_change is None:
+                                continue
+
+                            # Add to rows list instead of appending
+                            rows_list.append({
+                                "fairness_percent": fairness_change,
+                                "fairness_val": fairness_val,
+                                "performance_percent": performance_change,
+                                "dataset": dataset,
+                                "attribute": attribute,
+                                "model": model
+                            })
+
+                # Create the DataFrame from the list of rows
+                df = pd.DataFrame(rows_list)
+                
+                # Only create plot if we have data
+                if not df.empty:
+                    fairness_performance_scatter(df, results_dir, mitigation, fairness_metric, attribute)
+
