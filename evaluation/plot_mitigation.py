@@ -1002,21 +1002,25 @@ def create_shared_legend(results_dir):
     
     plt.close()
 
-def fairness_performance_scatter(df, results_dir, mitigation_type="reweighting", fairness_metric="EODD", attribute="age"):
+def fairness_performance_scatter(df, results_dir, vertical_lines, mitigation_type="reweighting", fairness_metric="EODD", attribute="age"):
     """
     Create a scatter plot showing the trade-off between fairness and performance changes.
     
     Args:
         df: DataFrame with the following columns:
+            - metric: Metric (string)
             - fairness_percent: Percentage change in fairness
             - fairness_val: Absolute fairness value
             - performance_percent: Percentage change in performance
             - dataset: Dataset type (string)
             - model: Model name (string)
+        vertical_lines: DataFrame with columns:
+            - performance_percent: x-position of vertical line
+            - model: Model name for color
+            - dataset: Dataset name for line style
         results_dir: Directory to save the plots
     """
-
-    # Set plotting parameters
+    
     plt.rcParams.update({
         "font.size": 24,
         "axes.titlesize": 28,
@@ -1027,69 +1031,155 @@ def fairness_performance_scatter(df, results_dir, mitigation_type="reweighting",
         "legend.title_fontsize": 18,
     })
 
-    # Define colors for models (using the existing color scheme)
     model_colors = {
-        "pix2pix": "#E6C321",  # Yellow
-        "unet": "#3089A2",     # Blue
-        "sde": "#EB0007"       # Red
+        "pix2pix": "#E6C321",
+        "unet": "#3089A2",
+        "sde": "#EB0007"
     }
-    
-    # Define dataset styles (outline or filled)
+
     dataset_markers = {
-        "chex": "s", 
-        "ucsf": "o" 
+        "chex": "s",
+        "ucsf": "o"
     }
-    
-    # Create figure and axis
+
+    metric_labels = {
+        "ec": "Enlarged Cardiomediastinum",
+        "cardiomegaly": "Cardiomegaly",
+        "lung-opacity": "Lung Opacity",
+        "lung-lesion": "Lung Lesion",
+        "edema": "Edema",
+        "consolidation": "Consolidation",
+        "pneumonia": "Pneumonia",
+        "atelectasis": "Atelectasis",
+        "pneumothorax": "Pneumothorax",
+        "pleural-effusion": "Pleural Effusion",
+        "pleural-other": "Pleural Other",
+        "fracture": "Fracture",
+        "average": "Average",
+        "tgrade": "Tumor Grade",
+        "ttype": "Tumor Type",
+    }
+    # Define line styles for datasets - using markers in the lines to match scatter plot
+    dataset_lines = {
+        "chex": {
+            "linestyle": "-",       # solid line
+            "marker": "s",          # square marker
+            "markevery": [0],       # place marker at the start (bottom)
+            "markersize": 10,       # larger marker size
+            "fillstyle": "none"     # hollow markers
+        },
+        "ucsf": {
+            "linestyle": "-",       # solid line
+            "marker": "o",          # circle marker
+            "markevery": [0],       # place marker at the start (bottom)
+            "markersize": 10,       # larger marker size
+            "fillstyle": "none"     # hollow markers
+        }
+    }
+
     plt.figure(figsize=(12, 10))
-    
-    # Normalize fairness values for marker size
+
+    # First plot vertical lines (so they appear behind the scatter points)
+    for _, line in vertical_lines.iterrows():
+        color = model_colors.get(line['model'], "#777777")
+        line_style = dataset_lines.get(line['dataset'], {})
+        
+        # Plot vertical line from bottom to top of plot
+        plt.axvline(x=line['performance_percent'], 
+                   color=color, 
+                   linestyle=line_style.get('linestyle', '-'),
+                   linewidth=2.0,    # Make lines thicker
+                   alpha=0.4,        # Slightly more visible
+                   zorder=1,         # Ensure lines are behind points
+                   marker=line_style.get('marker', 'o'),
+                   markevery=line_style.get('markevery', [0]),
+                   markersize=line_style.get('markersize', 10),
+                   fillstyle=line_style.get('fillstyle', 'none'),
+                   markeredgecolor=color)
+
+    # Rest of the plotting code...
     min_fairness = df['fairness_val'].min()
     max_fairness = df['fairness_val'].max()
-    
-    # Calculate normalized sizes between 50 and 300
+
     def normalize_size(val):
-        if max_fairness == min_fairness:  # Handle case where all values are the same
+        if max_fairness == min_fairness:
             return 150
         return 50 + 250 * (val - min_fairness) / (max_fairness - min_fairness)
+
+    # Calculate statistics to identify outliers
+    fairness_mean = df['fairness_percent'].mean()
+    fairness_std = df['fairness_percent'].std()
+    performance_mean = df['performance_percent'].mean()
+    performance_std = df['performance_percent'].std()
     
-    # Add points to the plot
+    # Define outlier thresholds (points beyond 2 standard deviations)
+    fairness_threshold = 1.5
+    performance_threshold = 1.5
+
+    # Collect all outliers to identify the most extreme ones
+    outliers = []
+    
+    # Plot scatter points with higher zorder to ensure they're on top of lines
     for idx, row in df.iterrows():
-        # Get corresponding properties for this point
         model = row['model']
         dataset = row['dataset']
+        metric = row['metric']
         fairness_pct = row['fairness_percent']
         performance_pct = row['performance_percent']
         fairness_val = row['fairness_val']
-        
-        # Get color, marker, and size
-        color = model_colors.get(model, "#777777")  # Grey default if model not found
-        marker = dataset_markers.get(dataset, "D")  # Diamond default if dataset not found
+
+        color = model_colors.get(model, "#777777")
+        marker = dataset_markers.get(dataset, "D")
         size = normalize_size(fairness_val)
-                
-        # Plot the point
-        scatter = plt.scatter(
-            performance_pct, fairness_pct, 
-            s=size, 
-            marker=marker, 
-            color=color
-        )
+
+        plt.scatter(performance_pct, fairness_pct, s=size, marker=marker, 
+                   color=color, zorder=2)  # Ensure points are above lines
+        
+        # Check if this point is an outlier
+        fairness_z = abs(fairness_pct - fairness_mean) / fairness_std if fairness_std > 0 else 0
+        performance_z = abs(performance_pct - performance_mean) / performance_std if performance_std > 0 else 0
+        
+        if fairness_z > fairness_threshold or performance_z > performance_threshold:
+            outlier_score = fairness_z + performance_z
+            outliers.append((outlier_score, idx, fairness_pct, performance_pct, metric, model, dataset))
+
+    # Sort outliers and add labels (with highest zorder to be on top)
+    outliers.sort(reverse=True)
+    top_outliers = outliers[:min(5, len(outliers))]
     
+    for _, idx, fairness_pct, performance_pct, metric, model, dataset in top_outliers:
+        label = metric_labels.get(metric, metric)
+        
+        plt.annotate(label, 
+                    xy=(performance_pct, fairness_pct),
+                    xytext=(7, 7), 
+                    textcoords='offset points',
+                    fontsize=12,
+                    bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.7),
+                    zorder=3)  # Ensure labels are on top
+
     # Add reference lines
-    plt.axhline(y=0, color='gray', linestyle='-', linewidth=1, alpha=0.6)
-    plt.axvline(x=0, color='gray', linestyle='-', linewidth=1, alpha=0.6)
-    
-    # Set labels and title
+    plt.axhline(y=0, color='gray', linestyle='-', linewidth=1, alpha=0.6, zorder=0)
+    plt.axvline(x=0, color='gray', linestyle='-', linewidth=1, alpha=0.6, zorder=0)
+
     plt.xlabel("Performance Change (%)", fontweight="bold")
     plt.ylabel("Fairness Change (%)", fontweight="bold")
-    
-    # Add grid
-    plt.grid(True, linestyle='--', alpha=0.3)
-    
-    # Adjust layout
+
+    plt.grid(True, linestyle='--', alpha=0.3, zorder=0)
+
+    # Scaling Y-axis to 10 times the X-axis
+    xlim = plt.xlim()
+    ylim = plt.ylim()
+    x_range = xlim[1] - xlim[0]
+    y_mid = (ylim[0] + ylim[1]) / 2
+    plt.ylim(y_mid - 5 * x_range, y_mid + 5 * x_range)
+
+    # Add the 10× label at the corner of the y-axis
+    plt.text(0.02, 0.98, "10×", transform=plt.gca().transAxes, 
+             fontsize=18, fontweight='bold', ha='left', va='top')
+
     plt.tight_layout()
-    
-    # Save plots
+
     for fmt in ["eps", "pdf", "png"]:
         os.makedirs(os.path.join(results_dir, fmt), exist_ok=True)
         plt.savefig(
@@ -1098,7 +1188,7 @@ def fairness_performance_scatter(df, results_dir, mitigation_type="reweighting",
             dpi=300,
             format=fmt,
         )
-    
+
     plt.close()
 
 
@@ -1195,11 +1285,20 @@ def plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir)
 
                 # Create a list to collect rows instead of using append
                 rows_list = []
+                vertical_lines = []
 
                 for model in performance_df["model"].unique():
                     if model == "baseline":
                         continue
                     for dataset in performance_df["dataset"].unique():
+
+                        pnsr_performance_change = _get_performance_change(performance_df, model, "psnr", dataset, mitigation)
+                        vertical_lines.append({
+                            "performance_percent": pnsr_performance_change,
+                            "model": model,
+                            "dataset": dataset,
+                        })
+
                         for interpreter in interpreters:
                             performance_change = _get_performance_change(performance_df, model, interpreter, dataset, mitigation)
                             fairness_change, fairness_val = _get_fairness_change(fairness_df, model, interpreter, attribute, fairness_metric, dataset, mitigation)
@@ -1209,6 +1308,7 @@ def plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir)
 
                             # Add to rows list instead of appending
                             rows_list.append({
+                                "metric": interpreter,
                                 "fairness_percent": fairness_change,
                                 "fairness_val": fairness_val,
                                 "performance_percent": performance_change,
@@ -1219,8 +1319,91 @@ def plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir)
 
                 # Create the DataFrame from the list of rows
                 df = pd.DataFrame(rows_list)
-                
+                vertical_lines = pd.DataFrame(vertical_lines)
+
+
+
                 # Only create plot if we have data
                 if not df.empty:
-                    fairness_performance_scatter(df, results_dir, mitigation, fairness_metric, attribute)
+                    fairness_performance_scatter(df, results_dir, vertical_lines, mitigation, fairness_metric, attribute)
+
+    # After all plots are generated, create the LaTeX grid
+    create_fairness_performance_latex_grid(results_dir)
+
+def create_fairness_performance_latex_grid(results_dir):
+    """
+    Create a LaTeX figure with a grid of fairness-performance plots organized by
+    mitigation type and attribute, allowing it to split across pages.
+    
+    Args:
+        results_dir: Directory containing the plots and where to save the LaTeX file
+    """
+    # Define the structure of plots to include
+    mitigations = ["reweighted", "eodd", "adv"]
+    mitigation_labels = {
+        "reweighted": "Reweighting",
+        "eodd": "Equalized Odds",
+        "adv": "Adversarial"
+    }
+    
+    fairness_metrics = ["EODD", "EOP"]
+    attributes = ["age", "gender", "ethnicity"]
+    
+    latex_content = []
+    
+    # Start with document content instead of a figure environment
+    # This allows splitting across pages
+    
+    # Loop through each mitigation type
+    for mitigation in mitigations:
+        # Add a subsection for this mitigation type        
+        # Create a 2x3 grid for each mitigation type (2 metrics × 3 attributes)
+        for metric in fairness_metrics:
+            # Start a figure for this row
+            latex_content.append(r"\begin{figure}[ht]")
+            latex_content.append(r"\centering")
+            
+            # Add plots for each attribute side by side with tabular
+            latex_content.append(r"\begin{tabular}{c@{\hspace{0.2cm}}c@{\hspace{0.2cm}}c}")  # Reduced spacing
+            
+            for i, attribute in enumerate(attributes):
+                plot_path = f"GR/fig/fairness_performance_tradeoff/pdf/fairness_performance_tradeoff_{mitigation}_{metric}-bootstrapped_{attribute}.pdf"
+                
+                # Add plot
+                latex_content.append(r"\begin{subfigure}[t]{0.3\textwidth}")
+                latex_content.append(r"    \centering")
+                latex_content.append(r"    \includegraphics[width=\linewidth]{" + plot_path + "}")
+                latex_content.append(r"    \caption{" + f"{attribute.capitalize()}" + "}")
+                latex_content.append(r"\end{subfigure}")
+                
+                # Add separator between columns (except for the last column)
+                if i < len(attributes) - 1:
+                    latex_content.append(r"&")
+            
+            # End tabular
+            latex_content.append(r"\end{tabular}")
+            
+            # Add caption for this row
+            latex_content.append(r"\caption{" + f"{mitigation_labels[mitigation]} Mitigation: {metric} Metric across Attributes" + "}")
+            latex_content.append(r"\end{figure}")
+            latex_content.append("")
+        
+        # Add minimal space between mitigation types
+        latex_content.append(r"\vspace{0.2cm}")  # Greatly reduced spacing
+        latex_content.append("")
+    
+    # Add the legend as a separate figure at the end
+    latex_content.append(r"\begin{figure}[ht]")
+    latex_content.append(r"\centering")
+    latex_content.append(r"\includegraphics[width=0.7\textwidth]{GR/fig/fairness_performance_tradeoff/pdf/fairness_performance_legend.pdf}")
+    latex_content.append(r"\caption{Legend for Fairness-Performance Trade-off Plots}")
+    latex_content.append(r"\label{fig:fairness-performance-legend}")
+    latex_content.append(r"\end{figure}")
+    
+    # Write to file
+    os.makedirs(os.path.join(results_dir, "latex"), exist_ok=True)
+    with open(os.path.join(results_dir, "latex", "fairness_performance_grid.tex"), "w") as f:
+        f.write("\n".join(latex_content))
+    
+    print(f"LaTeX grid saved to {os.path.join(results_dir, 'latex', 'fairness_performance_grid.tex')}")
 
