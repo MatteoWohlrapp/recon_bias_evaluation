@@ -1,5 +1,5 @@
 import pandas as pd
-from plot_mitigation import plot_mitigation_combined, performance_evaluation_ucsf_table, performance_evaluation_chex_table, plot_combined_fairness_summary, plot_fairness_performance_tradeoff
+from plot_mitigation import plot_mitigation_combined, performance_evaluation_ucsf_table, performance_evaluation_chex_table, plot_combined_fairness_summary, plot_fairness_performance_tradeoff, plot_combined_mitigation_summary
 
 
 def evaluate_mitigation(config, results_dir, name):
@@ -26,7 +26,7 @@ def evaluate_mitigation(config, results_dir, name):
     csv_eodd = pd.concat([csv_eodd_ucsf, csv_eodd_chex])
     csv_reweighted = pd.concat([csv_reweighted_ucsf, csv_reweighted_chex])
 
-    #plot_mitigation_combined(csv_standard, csv_reweighted, csv_eodd, csv_eodd.copy(), results_dir, name)
+    plot_mitigation_combined(csv_standard, csv_reweighted, csv_eodd, csv_eodd.copy(), results_dir, name)
 
 
     performance_config = config["performance"]
@@ -129,3 +129,5 @@ def evaluate_mitigation(config, results_dir, name):
     
     # --- Plot Fairness Performance Tradeoff ---
     plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir)
+
+    plot_combined_mitigation_summary(fairness_df, results_dir)

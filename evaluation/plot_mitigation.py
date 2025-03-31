@@ -1407,3 +1407,249 @@ def create_fairness_performance_latex_grid(results_dir):
     
     print(f"LaTeX grid saved to {os.path.join(results_dir, 'latex', 'fairness_performance_grid.tex')}")
 
+def plot_combined_mitigation_summary(combined_results, results_dir):
+
+    latex_path = "latex/templates/combined_fairness_colors_mitigation.tex"
+    file_name = latex_path.split("/")[-1].split(".")[0]
+    with open(latex_path, "r") as file:
+        latex_content = file.read()
+
+    new_latex_content = ""
+
+    # Color definitions for positive and negative values
+    colors = {
+        "positive": {
+            "significant": "E6C321",  # p < 0.05
+            "marginal": "F1D892",  # 0.05 <= p < 0.1
+        },
+        "negative": {
+            "significant": "3089A2",  # p < 0.05
+            "marginal": "93C1C9",  # 0.05 <= p < 0.1
+        },
+    }
+
+    interpreter_metrics = {
+        "ec": ("age", "gender", "ethnicity"),
+        "cardiomegaly": ("age", "gender", "ethnicity"),
+        "lung-opacity": ("age", "gender", "ethnicity"),
+        "lung-lesion": ("age", "gender", "ethnicity"),
+        "edema": ("age", "gender", "ethnicity"),
+        "consolidation": ("age", "gender", "ethnicity"),
+        "pneumonia": ("age", "gender", "ethnicity"),
+        "atelectasis": ("age", "gender", "ethnicity"),
+        "pneumothorax": ("age", "gender", "ethnicity"),
+        "pleural-effusion": ("age", "gender", "ethnicity"),
+        "pleural-other": ("age", "gender", "ethnicity"),
+        "fracture": ("age", "gender", "ethnicity"),
+        "tgrade": ("age", "gender"),
+        "ttype": ("age", "gender"),
+    }
+    interpreter_metric_labels = {
+        "ec": "EC",
+        "cardiomegaly": "Cardiomegaly",
+        "lung-opacity": "Lung Opacity",
+        "lung-lesion": "Lung Lesion",
+        "edema": "Edema",
+        "consolidation": "Consolidation",
+        "pneumonia": "Pneumonia",
+        "atelectasis": "Atelectasis",
+        "pneumothorax": "Pneumothorax",
+        "pleural-effusion": "Pleural Effusion",
+        "pleural-other": "Pleural Other",
+        "fracture": "Fracture",
+        "tgrade": "Tumor Grade",
+        "ttype": "Tumor Type",
+    }
+
+    models = ["unet", "pix2pix", "sde"]
+    metrics = ["EODD", "EOP"]
+
+    segmentation_metrics = ["SER", "delta-dice"]
+
+    attributes = ["gender", "age", "ethnicity"]
+    attribute_mapping = {
+        "gender": "gender",
+        "age": "age",
+        "ethnicity": "race",
+    }
+    mitigations = ["reweighted", "eodd", "adv"]
+
+    mitigation_mapping = {
+        "reweighted": "Reweighting",
+        "eodd": "Equalized Odds",
+        "adv": "Adversarial",
+    }
+
+    attribute_contents = []
+
+    for mitigation in mitigations:
+        mitigation_content = latex_content.replace(
+            "-mitigation-", mitigation_mapping[mitigation]
+        )
+        for attribute in attributes:
+            attribute_content = mitigation_content.replace(
+                "-attribute-", attribute_mapping[attribute]
+            )
+            classifier_content = ""
+            for interpreter, interpreter_attributes in interpreter_metrics.items():
+                content = ""
+                if attribute in interpreter_attributes:
+                    content += f"\\multicolumn{{1}}{{l|}}{{\\textbf{{{interpreter_metric_labels[interpreter]}}}}}"
+
+                    for model in models:
+                        for metric in metrics:
+                            filtered_results = combined_results[
+                                (combined_results["metric"] == f"{metric}-bootstrapped")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == interpreter)
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+                            result = filtered_results["value"].iloc[0]
+
+                            if len(filtered_results) == 0:
+                                continue
+
+
+                            filtered_p_values = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-p-value")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == interpreter)
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+
+                            filtered_std_errors = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-std-err")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == interpreter)
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+                            filtered_delta_result = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-bootstrapped")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == interpreter)
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)    
+                            ]
+                            
+
+                            p_value = filtered_p_values["value"].iloc[0]
+                            std_error = filtered_std_errors["value"].iloc[0]
+                            delta_result = filtered_delta_result["value"].iloc[0]
+
+                            color = None
+                            if delta_result > 0:
+                                if p_value < 0.05:
+                                    color = colors["positive"]["significant"]
+                                elif p_value < 0.1:
+                                    color = colors["positive"]["marginal"]
+                            if delta_result < 0:
+                                if p_value < 0.05:
+                                    color = colors["negative"]["significant"]
+                                elif p_value < 0.1:
+                                    color = colors["negative"]["marginal"]
+
+                            if color is not None:
+                                content += f"& \\cellcolor[HTML]{{{color}}}{{{result:.3f}$\\pm${std_error:.3f}}}"
+                            else:
+                                content += f"& {result:.3f}$\\pm${std_error:.3f}"
+
+                    classifier_content += content + "\\\\ \n"
+
+            attribute_content = attribute_content.replace(
+                "-classifier-", classifier_content
+            )
+
+            if attribute in ["gender", "age"]:
+                segmentation_content = """
+                                                             &                                            &                                                   &                                            &                                                   &                                            &                                                   \\\\ \\hline
+                \\multicolumn{1}{l|}{} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{$SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} \\\\ \\hline
+                    """
+                content = ""
+                content += f"\\multicolumn{{1}}{{l|}}{{\\textbf{{Segmentation}}}}"
+
+                for model in models:
+                    for metric in segmentation_metrics:
+                        filtered_results = combined_results[
+                            (combined_results["metric"] == f"{metric}-bootstrapped")
+                            & (combined_results["model"] == model)
+                            & (combined_results["interpreter"] == "dice")
+                            & (combined_results["attribute"] == attribute)
+                            & (combined_results["mitigation"] == mitigation)
+                        ]
+                        result = filtered_results["value"].iloc[0]
+                        if len(filtered_results) == 0:
+                            continue
+
+                        if model == "baseline":
+                            content += f"& {result:.3f}"
+                        else:
+                            filtered_p_values = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-p-value")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == "dice")
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+
+                            filtered_std_errors = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-std-err")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == "dice")
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+                            filtered_delta_result = combined_results[
+                                (combined_results["metric"] == f"delta-{metric}-bootstrapped")
+                                & (combined_results["model"] == model)
+                                & (combined_results["interpreter"] == "dice")
+                                & (combined_results["attribute"] == attribute)
+                                & (combined_results["mitigation"] == mitigation)
+                            ]
+
+                            p_value = filtered_p_values["value"].iloc[0]
+                            std_error = filtered_std_errors["value"].iloc[0]
+                            delta_result = filtered_delta_result["value"].iloc[0]
+
+                            color = None
+                            if delta_result > 0:
+                                if p_value < 0.05:
+                                    color = colors["positive"]["significant"]
+                                elif p_value < 0.1:
+                                    color = colors["positive"]["marginal"]
+                            if delta_result < 0:
+                                if p_value < 0.05:
+                                    color = colors["negative"]["significant"]
+                                elif p_value < 0.1:
+                                    color = colors["negative"]["marginal"]
+
+                            if color is not None:
+                                content += f"& \\cellcolor[HTML]{{{color}}}{{{result:.3f}$\\pm${std_error:.3f}}}" 
+                            else:
+
+                                content += f"& {result:.3f}$\\pm${std_error:.3f}"
+
+                segmentation_content += "\n" + content + "\\\\"
+
+                attribute_content += segmentation_content
+
+            attribute_content += """    
+            \end{tabular} 
+            } 
+            \end{table}"""
+
+            legend = """\\\\[0.3cm]
+                \\begin{tabular}{llllllll} 
+                \\cellcolor[HTML]{E6C321} & $+$, $p < 0.05$ & \\cellcolor[HTML]{F1D892} &$+$, $0.05 \\leq p < 0.1$ & \\cellcolor[HTML]{3089A2} & $-$, $p < 0.05$  & \\cellcolor[HTML]{93C1C9} & $-$, $0.05 \\leq p < 0.1$ \\\\
+                \\end{tabular}"""
+            attribute_content = attribute_content.replace("-legend-", legend)
+
+            attribute_contents.append(attribute_content)
+
+    for content in attribute_contents:
+        new_latex_content += content
+
+    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+        file.write(new_latex_content)
