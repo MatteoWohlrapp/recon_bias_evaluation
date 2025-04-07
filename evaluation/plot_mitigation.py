@@ -36,7 +36,7 @@ def create_latex_grid(run_name, results_dir):
 
     latex_content = []
     latex_content.append(r"\begin{figure}[htbp]")
-    latex_content.append(r"\caption{" + f"{run_name}" + "}")
+    latex_content.append(r"\caption{" + f"{run_name.replace('_', '-')}" + "}")
     latex_content.append(r"    \centering")
     
     # Add legend
@@ -1562,7 +1562,7 @@ def table_fairness_evaluation_mitigation(combined_results, results_dir):
             if attribute in ["gender", "age"]:
                 segmentation_content = """
                                                              &                                            &                                                   &                                            &                                                   &                                            &                                                   \\\\ \\hline
-                \\multicolumn{1}{l|}{} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{$SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} \\\\ \\hline
+                \\multicolumn{1}{l|}{} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} & \\multicolumn{1}{c}{\\textbf{SER}}  & \\multicolumn{1}{c}{\\textbf{$\\Delta$ Dice}} \\\\ \\hline
                     """
                 content = ""
                 content += f"\\multicolumn{{1}}{{l|}}{{\\textbf{{Segmentation}}}}"
