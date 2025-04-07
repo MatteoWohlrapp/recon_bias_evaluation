@@ -42,7 +42,7 @@ def create_latex_grid(run_name, results_dir):
     # Add legend
     latex_content.append(r"    \begin{subfigure}[t]{0.4\textwidth}")
     latex_content.append(r"        \centering")
-    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_legend.pdf" + "}")
+    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_legend.pdf" + "}")
     latex_content.append(r"    \end{subfigure}")
     latex_content.append("")
     
@@ -58,14 +58,14 @@ def create_latex_grid(run_name, results_dir):
         # Add first plot
         latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
-        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter1}.pdf" + "}")
+        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_{interpreter1}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
         latex_content.append(r"        &")
         
         # Add second plot
         latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
-        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter2}.pdf" + "}")
+        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_{interpreter2}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
         
         # Add line break unless it's the last pair
@@ -80,7 +80,7 @@ def create_latex_grid(run_name, results_dir):
     latex_content.append(r"    \vspace{0.5cm}")
     latex_content.append(r"    \begin{subfigure}[t]{0.48\textwidth}")
     latex_content.append(r"        \centering")
-    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_average.pdf" + "}")
+    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_average.pdf" + "}")
     latex_content.append(r"    \end{subfigure}")
     latex_content.append("")
     
@@ -88,11 +88,10 @@ def create_latex_grid(run_name, results_dir):
     latex_content.append(r"\end{figure}")
     
     # Write to file
-    os.makedirs(os.path.join(results_dir, "latex"), exist_ok=True)
-    with open(os.path.join(results_dir, "latex", "mitigation_grid.tex"), "w") as f:
+    with open(os.path.join(results_dir, run_name, "mitigation_grid.tex"), "w") as f:
         f.write("\n".join(latex_content))
 
-def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, results_dir, run_name):
+def plot_fairness_change_mitigation(original_df, reweighted_df, eodd_df, adv_df, results_dir, run_name):
     """
     Create a faceted bar plot showing the difference between different mitigation approaches vs. original
     for EODD and EOP metrics across different models and attributes.
@@ -301,7 +300,7 @@ def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, result
         g.fig.suptitle(metric_labels[interpreter], fontweight="bold", fontsize=28, y=1.1)
         
         # Add y-axis label to the leftmost plot
-        g.axes[0, 0].set_ylabel("Bias Reduction", fontweight="bold")
+        g.axes[0, 0].set_ylabel("Bias Change", fontweight="bold")
         
         # Remove individual legends
         for ax in g.axes.flat:
@@ -310,7 +309,7 @@ def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, result
         
         # Save the plots
         for fmt in ["eps", "pdf", "png"]:
-            save_dir = os.path.join(results_dir, f"{run_name}_mitigation_comparison", fmt)
+            save_dir = os.path.join(results_dir, f"plot_fairness_change_mitigation", fmt)
             os.makedirs(save_dir, exist_ok=True)
             plt.savefig(
                 f"{save_dir}/mitigation_comparison_{interpreter}.{fmt}",
@@ -365,7 +364,7 @@ def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, result
 
     # Save legend
     for fmt in ["eps", "pdf", "png"]:
-        save_dir = os.path.join(results_dir, f"{run_name}_mitigation_comparison", fmt)
+        save_dir = os.path.join(results_dir, f"plot_fairness_change_mitigation", fmt)
         os.makedirs(save_dir, exist_ok=True)
         plt.savefig(
             f"{save_dir}/mitigation_comparison_legend.{fmt}",
@@ -376,11 +375,9 @@ def plot_mitigation_combined(original_df, reweighted_df, eodd_df, adv_df, result
     plt.close()
 
     # Create the LaTeX grid
-    create_latex_grid(run_name, results_dir)
+    create_latex_grid("plot_fairness_change_mitigation", results_dir)
 
-
-
-def performance_evaluation_ucsf_table(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
+def table_performance_evaluation_ucsf_mitigation(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
     # create new df object empty 
     results = pd.DataFrame()
 
@@ -510,10 +507,10 @@ def performance_evaluation_ucsf_table(results_dir, csv_standard, csv_eodd, csv_r
                     latex_content = latex_content.replace(key, formatted_value)
 
     # Write to latex
-    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+    with open(os.path.join(results_dir, f"table_performance_evaluation_ucsf_mitigation.tex"), "w") as file:
         file.write(latex_content)
 
-def performance_evaluation_chex_table(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
+def table_performance_evaluation_chex_mitigation(results_dir, csv_standard, csv_eodd, csv_reweighted, csv_adv):
     # create new df object empty 
     results = pd.DataFrame()
 
@@ -653,10 +650,10 @@ def performance_evaluation_chex_table(results_dir, csv_standard, csv_eodd, csv_r
                     latex_content = latex_content.replace(key, formatted_value)
 
     # Write to latex
-    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+    with open(os.path.join(results_dir, f"table_performance_evaluation_chex_mitigation.tex"), "w") as file:
         file.write(latex_content)
 
-def plot_combined_fairness_summary(combined_results, results_dir):
+def table_fairness_evaluation_standard(combined_results, results_dir):
 
     latex_path = "latex/templates/combined_fairness_colors.tex"
     file_name = latex_path.split("/")[-1].split(".")[0]
@@ -914,7 +911,7 @@ def plot_combined_fairness_summary(combined_results, results_dir):
     for content in attribute_contents:
         new_latex_content += content
 
-    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+    with open(os.path.join(results_dir, f"table_fairness_evaluation_standard.tex"), "w") as file:
         file.write(new_latex_content)
 
 def create_shared_legend(results_dir):
@@ -1256,7 +1253,7 @@ def plot_fairness_performance_tradeoff(performance_df, fairness_df, results_dir)
     """
     performance_df_og = performance_df.copy()
     fairness_df_og = fairness_df.copy()
-    results_dir = os.path.join(results_dir, "fairness_performance_tradeoff")
+    results_dir = os.path.join(results_dir, "plot_fairness_performance_tradeoff")
     os.makedirs(results_dir, exist_ok=True)
 
     # Create a shared legend first
@@ -1367,7 +1364,7 @@ def create_fairness_performance_latex_grid(results_dir):
             latex_content.append(r"\begin{tabular}{c@{\hspace{0.2cm}}c@{\hspace{0.2cm}}c}")  # Reduced spacing
             
             for i, attribute in enumerate(attributes):
-                plot_path = f"GR/fig/fairness_performance_tradeoff/pdf/fairness_performance_tradeoff_{mitigation}_{metric}-bootstrapped_{attribute}.pdf"
+                plot_path = f"GR/fig/fairness_performance_tradeoff/fairness_performance_tradeoff_{mitigation}_{metric}-bootstrapped_{attribute}.pdf"
                 
                 # Add plot
                 latex_content.append(r"\begin{subfigure}[t]{0.3\textwidth}")
@@ -1395,7 +1392,7 @@ def create_fairness_performance_latex_grid(results_dir):
     # Add the legend as a separate figure at the end
     latex_content.append(r"\begin{figure}[ht]")
     latex_content.append(r"\centering")
-    latex_content.append(r"\includegraphics[width=0.7\textwidth]{GR/fig/fairness_performance_tradeoff/pdf/fairness_performance_legend.pdf}")
+    latex_content.append(r"\includegraphics[width=0.7\textwidth]{GR/fig/fairness_performance_tradeoff/fairness_performance_legend.pdf}")
     latex_content.append(r"\caption{Legend for Fairness-Performance Trade-off Plots}")
     latex_content.append(r"\label{fig:fairness-performance-legend}")
     latex_content.append(r"\end{figure}")
@@ -1407,7 +1404,7 @@ def create_fairness_performance_latex_grid(results_dir):
     
     print(f"LaTeX grid saved to {os.path.join(results_dir, 'latex', 'fairness_performance_grid.tex')}")
 
-def plot_combined_mitigation_summary(combined_results, results_dir):
+def table_fairness_evaluation_mitigation(combined_results, results_dir):
 
     latex_path = "latex/templates/combined_fairness_colors_mitigation.tex"
     file_name = latex_path.split("/")[-1].split(".")[0]
@@ -1651,5 +1648,5 @@ def plot_combined_mitigation_summary(combined_results, results_dir):
     for content in attribute_contents:
         new_latex_content += content
 
-    with open(os.path.join(results_dir, f"{file_name}.tex"), "w") as file:
+    with open(os.path.join(results_dir, f"table_fairness_evaluation_mitigation.tex"), "w") as file:
         file.write(new_latex_content)
