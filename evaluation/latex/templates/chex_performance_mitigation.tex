@@ -1,25 +1,134 @@
+% -------- U-NET TABLE --------
 \begin{table}[]
-        \centering
-        \caption{CheXpert image metrics and prediction performance when applied to the reconstructed images. Baseline is the prediction on the ground truth images; EC: Enlarged Cardiomediastinum}\label{tab:chex_perf}
-        
-        \begin{tabular}{ll|cccccccccc}
-            \hline
-            \multicolumn{2}{c|}{}                                   & \multicolumn{1}{c|}{}                                    & \multicolumn{3}{c|}{\textbf{U-Net}}                             & \multicolumn{3}{c|}{\textbf{Pix2Pix}}                           & \multicolumn{3}{c}{\textbf{SDE}}           \\ \cline{4-12} 
-            \multicolumn{2}{c|}{\multirow{-2}{*}{\textbf{Metrics}}} & \multicolumn{1}{c|}{\multirow{-2}{*}{\textbf{Baseline}}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\ \hline
-        \multirow{13}{*}{\textbf{AUROC}} & \textbf{Atelectasis} & baseline-atelectasis & unet-atelectasis-re & unet-atelectasis-eodd & unet-atelectasis-adv & pix2pix-atelectasis-re & pix2pix-atelectasis-eodd & pix2pix-atelectasis-adv & sde-atelectasis-re & sde-atelectasis-eodd & sde-atelectasis-adv \\
-        & \textbf{Cardiomegaly} & baseline-cardiomegaly & unet-cardiomegaly-re & unet-cardiomegaly-eodd & unet-cardiomegaly-adv & pix2pix-cardiomegaly-re & pix2pix-cardiomegaly-eodd & pix2pix-cardiomegaly-adv & sde-cardiomegaly-re & sde-cardiomegaly-eodd & sde-cardiomegaly-adv \\
-        & \textbf{Consolidation} & baseline-consolidation & unet-consolidation-re & unet-consolidation-eodd & unet-consolidation-adv & pix2pix-consolidation-re & pix2pix-consolidation-eodd & pix2pix-consolidation-adv & sde-consolidation-re & sde-consolidation-eodd & sde-consolidation-adv \\
-        & \textbf{Edema} & baseline-edema & unet-edema-re & unet-edema-eodd & unet-edema-adv & pix2pix-edema-re & pix2pix-edema-eodd & pix2pix-edema-adv & sde-edema-re & sde-edema-eodd & sde-edema-adv \\
-        & \textbf{EC} & baseline-ec & unet-ec-re & unet-ec-eodd & unet-ec-adv & pix2pix-ec-re & pix2pix-ec-eodd & pix2pix-ec-adv & sde-ec-re & sde-ec-eodd & sde-ec-adv \\
-        & \textbf{Fracture} & baseline-fracture & unet-fracture-re & unet-fracture-eodd & unet-fracture-adv & pix2pix-fracture-re & pix2pix-fracture-eodd & pix2pix-fracture-adv & sde-fracture-re & sde-fracture-eodd & sde-fracture-adv \\
-        & \textbf{Lung Lesion} & baseline-lung-lesion & unet-lung-lesion-re & unet-lung-lesion-eodd & unet-lung-lesion-adv & pix2pix-lung-lesion-re & pix2pix-lung-lesion-eodd & pix2pix-lung-lesion-adv & sde-lung-lesion-re & sde-lung-lesion-eodd & sde-lung-lesion-adv \\
-        & \textbf{Lung Opacity} & baseline-lung-opacity & unet-lung-opacity-re & unet-lung-opacity-eodd & unet-lung-opacity-adv & pix2pix-lung-opacity-re & pix2pix-lung-opacity-eodd & pix2pix-lung-opacity-adv & sde-lung-opacity-re & sde-lung-opacity-eodd & sde-lung-opacity-adv \\
-        & \textbf{Pleural Effusion} & baseline-pleural-effusion & unet-pleural-effusion-re & unet-pleural-effusion-eodd & unet-pleural-effusion-adv & pix2pix-pleural-effusion-re & pix2pix-pleural-effusion-eodd & pix2pix-pleural-effusion-adv & sde-pleural-effusion-re & sde-pleural-effusion-eodd & sde-pleural-effusion-adv \\
-        & \textbf{Pleural Other} & baseline-pleural-other & unet-pleural-other-re & unet-pleural-other-eodd & unet-pleural-other-adv & pix2pix-pleural-other-re & pix2pix-pleural-other-eodd & pix2pix-pleural-other-adv & sde-pleural-other-re & sde-pleural-other-eodd & sde-pleural-other-adv \\
-        & \textbf{Pneumonia} & baseline-pneumonia & unet-pneumonia-re & unet-pneumonia-eodd & unet-pneumonia-adv & pix2pix-pneumonia-re & pix2pix-pneumonia-eodd & pix2pix-pneumonia-adv & sde-pneumonia-re & sde-pneumonia-eodd & sde-pneumonia-adv \\
-        & \textbf{Pneumothorax} & baseline-pneumothorax & unet-pneumothorax-re & unet-pneumothorax-eodd & unet-pneumothorax-adv & pix2pix-pneumothorax-re & pix2pix-pneumothorax-eodd & pix2pix-pneumothorax-adv & sde-pneumothorax-re & sde-pneumothorax-eodd & sde-pneumothorax-adv \\
-        & \textbf{Average} & baseline-average & unet-average-re & unet-average-eodd & unet-average-adv & pix2pix-average-re & pix2pix-average-eodd & pix2pix-average-adv & sde-average-re & sde-average-eodd & sde-average-adv \\ \cline{1-2}
-        \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} & unet-psnr-re & unet-psnr-eodd & unet-psnr-adv & pix2pix-psnr-re & pix2pix-psnr-eodd & pix2pix-psnr-adv & sde-psnr-re & sde-psnr-eodd & sde-psnr-adv \\ \cline{1-2}
-        \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} & unet-lpips-re & unet-lpips-eodd & unet-lpips-adv & pix2pix-lpips-re & pix2pix-lpips-eodd & pix2pix-lpips-adv & sde-lpips-re & sde-lpips-eodd & sde-lpips-adv \\ \hline
+    \centering
+    \caption{CheXpert performance change for bias mitigation using \textbf{U-Net}}
+    \label{tab:chex_perf_unet}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{U-Net}} \\
+    \cline{4-7}
+     &  &  & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
+
+    \multirow{13}{*}{\textbf{AUROC}} 
+    & \textbf{Atelectasis} & baseline-atelectasis & unet-atelectasis-standard & unet-atelectasis-re & unet-atelectasis-eodd & unet-atelectasis-adv \\
+    & \textbf{Cardiomegaly} & baseline-cardiomegaly & unet-cardiomegaly-standard & unet-cardiomegaly-re & unet-cardiomegaly-eodd & unet-cardiomegaly-adv \\
+    & \textbf{Consolidation} & baseline-consolidation & unet-consolidation-standard & unet-consolidation-re & unet-consolidation-eodd & unet-consolidation-adv \\
+    & \textbf{Edema} & baseline-edema & unet-edema-standard & unet-edema-re & unet-edema-eodd & unet-edema-adv \\
+    & \textbf{EC} & baseline-ec & unet-ec-standard & unet-ec-re & unet-ec-eodd & unet-ec-adv \\
+    & \textbf{Fracture} & baseline-fracture & unet-fracture-standard & unet-fracture-re & unet-fracture-eodd & unet-fracture-adv \\
+    & \textbf{Lung Lesion} & baseline-lung-lesion & unet-lung-lesion-standard & unet-lung-lesion-re & unet-lung-lesion-eodd & unet-lung-lesion-adv \\
+    & \textbf{Lung Opacity} & baseline-lung-opacity & unet-lung-opacity-standard & unet-lung-opacity-re & unet-lung-opacity-eodd & unet-lung-opacity-adv \\
+    & \textbf{Pleural Effusion} & baseline-pleural-effusion & unet-pleural-effusion-standard & unet-pleural-effusion-re & unet-pleural-effusion-eodd & unet-pleural-effusion-adv \\
+    & \textbf{Pleural Other} & baseline-pleural-other & unet-pleural-other-standard & unet-pleural-other-re & unet-pleural-other-eodd & unet-pleural-other-adv \\
+    & \textbf{Pneumonia} & baseline-pneumonia & unet-pneumonia-standard & unet-pneumonia-re & unet-pneumonia-eodd & unet-pneumonia-adv \\
+    & \textbf{Pneumothorax} & baseline-pneumothorax & unet-pneumothorax-standard & unet-pneumothorax-re & unet-pneumothorax-eodd & unet-pneumothorax-adv \\
+    & \textbf{Average} & baseline-average & unet-average-standard & unet-average-re & unet-average-eodd & unet-average-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} & unet-psnr-standard & unet-psnr-re & unet-psnr-eodd & unet-psnr-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} & unet-lpips-standard & unet-lpips-re & unet-lpips-eodd & unet-lpips-adv \\
+    \hline
     \end{tabular}
-    \end{table}
+    
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
+\end{table}
+
+% -------- PIX2PIX TABLE --------
+\begin{table}[]
+    \centering
+    \caption{CheXpert performance change for bias mitigation using \textbf{Pix2Pix}}
+    \label{tab:chex_perf_pix2pix}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{Pix2Pix}} \\
+    \cline{4-7}
+     &  &  & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
+
+    \multirow{13}{*}{\textbf{AUROC}} 
+    & \textbf{Atelectasis} & baseline-atelectasis & pix2pix-atelectasis-standard & pix2pix-atelectasis-re & pix2pix-atelectasis-eodd & pix2pix-atelectasis-adv \\
+    & \textbf{Cardiomegaly} & baseline-cardiomegaly & pix2pix-cardiomegaly-standard & pix2pix-cardiomegaly-re & pix2pix-cardiomegaly-eodd & pix2pix-cardiomegaly-adv \\
+    & \textbf{Consolidation} & baseline-consolidation & pix2pix-consolidation-standard & pix2pix-consolidation-re & pix2pix-consolidation-eodd & pix2pix-consolidation-adv \\
+    & \textbf{Edema} & baseline-edema & pix2pix-edema-standard & pix2pix-edema-re & pix2pix-edema-eodd & pix2pix-edema-adv \\
+    & \textbf{EC} & baseline-ec & pix2pix-ec-standard & pix2pix-ec-re & pix2pix-ec-eodd & pix2pix-ec-adv \\
+    & \textbf{Fracture} & baseline-fracture & pix2pix-fracture-standard & pix2pix-fracture-re & pix2pix-fracture-eodd & pix2pix-fracture-adv \\
+    & \textbf{Lung Lesion} & baseline-lung-lesion & pix2pix-lung-lesion-standard & pix2pix-lung-lesion-re & pix2pix-lung-lesion-eodd & pix2pix-lung-lesion-adv \\
+    & \textbf{Lung Opacity} & baseline-lung-opacity & pix2pix-lung-opacity-standard & pix2pix-lung-opacity-re & pix2pix-lung-opacity-eodd & pix2pix-lung-opacity-adv \\
+    & \textbf{Pleural Effusion} & baseline-pleural-effusion & pix2pix-pleural-effusion-standard & pix2pix-pleural-effusion-re & pix2pix-pleural-effusion-eodd & pix2pix-pleural-effusion-adv \\
+    & \textbf{Pleural Other} & baseline-pleural-other & pix2pix-pleural-other-standard & pix2pix-pleural-other-re & pix2pix-pleural-other-eodd & pix2pix-pleural-other-adv \\
+    & \textbf{Pneumonia} & baseline-pneumonia & pix2pix-pneumonia-standard & pix2pix-pneumonia-re & pix2pix-pneumonia-eodd & pix2pix-pneumonia-adv \\
+    & \textbf{Pneumothorax} & baseline-pneumothorax & pix2pix-pneumothorax-standard & pix2pix-pneumothorax-re & pix2pix-pneumothorax-eodd & pix2pix-pneumothorax-adv \\
+    & \textbf{Average} & baseline-average & pix2pix-average-standard & pix2pix-average-re & pix2pix-average-eodd & pix2pix-average-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} & pix2pix-psnr-standard & pix2pix-psnr-re & pix2pix-psnr-eodd & pix2pix-psnr-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} & pix2pix-lpips-standard & pix2pix-lpips-re & pix2pix-lpips-eodd & pix2pix-lpips-adv \\
+    \hline
+    \end{tabular}
+    
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
+\end{table}
+
+% -------- SDE TABLE --------
+\begin{table}[]
+    \centering
+    \caption{CheXpert performance change for bias mitigation using \textbf{SDE}}
+    \label{tab:chex_perf_sde}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{SDE}} \\
+    \cline{4-7}
+     &  &  & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
+
+    \multirow{13}{*}{\textbf{AUROC}} 
+    & \textbf{Atelectasis} & baseline-atelectasis & sde-atelectasis-standard & sde-atelectasis-re & sde-atelectasis-eodd & sde-atelectasis-adv \\
+    & \textbf{Cardiomegaly} & baseline-cardiomegaly & sde-cardiomegaly-standard & sde-cardiomegaly-re & sde-cardiomegaly-eodd & sde-cardiomegaly-adv \\
+    & \textbf{Consolidation} & baseline-consolidation & sde-consolidation-standard & sde-consolidation-re & sde-consolidation-eodd & sde-consolidation-adv \\
+    & \textbf{Edema} & baseline-edema & sde-edema-standard & sde-edema-re & sde-edema-eodd & sde-edema-adv \\
+    & \textbf{EC} & baseline-ec & sde-ec-standard & sde-ec-re & sde-ec-eodd & sde-ec-adv \\
+    & \textbf{Fracture} & baseline-fracture & sde-fracture-standard & sde-fracture-re & sde-fracture-eodd & sde-fracture-adv \\
+    & \textbf{Lung Lesion} & baseline-lung-lesion & sde-lung-lesion-standard & sde-lung-lesion-re & sde-lung-lesion-eodd & sde-lung-lesion-adv \\
+    & \textbf{Lung Opacity} & baseline-lung-opacity & sde-lung-opacity-standard & sde-lung-opacity-re & sde-lung-opacity-eodd & sde-lung-opacity-adv \\
+    & \textbf{Pleural Effusion} & baseline-pleural-effusion & sde-pleural-effusion-standard & sde-pleural-effusion-re & sde-pleural-effusion-eodd & sde-pleural-effusion-adv \\
+    & \textbf{Pleural Other} & baseline-pleural-other & sde-pleural-other-standard & sde-pleural-other-re & sde-pleural-other-eodd & sde-pleural-other-adv \\
+    & \textbf{Pneumonia} & baseline-pneumonia & sde-pneumonia-standard & sde-pneumonia-re & sde-pneumonia-eodd & sde-pneumonia-adv \\
+    & \textbf{Pneumothorax} & baseline-pneumothorax & sde-pneumothorax-standard & sde-pneumothorax-re & sde-pneumothorax-eodd & sde-pneumothorax-adv \\
+    & \textbf{Average} & baseline-average & sde-average-standard & sde-average-re & sde-average-eodd & sde-average-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} & sde-psnr-standard & sde-psnr-re & sde-psnr-eodd & sde-psnr-adv \\
+    \cline{1-2}
+    
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} & sde-lpips-standard & sde-lpips-re & sde-lpips-eodd & sde-lpips-adv \\
+    \hline
+    \end{tabular}
+    
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
+\end{table}

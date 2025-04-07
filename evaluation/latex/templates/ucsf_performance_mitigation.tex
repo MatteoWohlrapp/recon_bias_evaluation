@@ -1,38 +1,122 @@
 \begin{table}[]
     \centering
-    \caption{CheXpert image metrics and prediction performance when applied to the reconstructed images. Baseline is the prediction on the ground truth images; EC: Enlarged Cardiomediastinum}\label{tab:chex_perf}
-    
-    \begin{tabular}{ll|cccccccccc}
-        \hline
-        \multicolumn{2}{c|}{}                                   & \multicolumn{1}{c|}{}                                    & \multicolumn{3}{c|}{\textbf{U-Net}}                             & \multicolumn{3}{c|}{\textbf{Pix2Pix}}                           & \multicolumn{3}{c}{\textbf{SDE}}           \\ \cline{4-12} 
-        \multicolumn{2}{c|}{\multirow{-2}{*}{\textbf{Metrics}}} & \multicolumn{1}{c|}{\multirow{-2}{*}{\textbf{Baseline}}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \multicolumn{1}{c|}{\textbf{ADV}} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\ \hline
+    \caption{UCSF-PDGM performance change for bias mitigation using \textbf{U-Net}}
+    \label{tab:ucsf_perf_unet}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{U-Net}} \\
+    \cline{4-7}
+    \multicolumn{2}{c|}{} 
+    & 
+    & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
 
     \multirow{2}{*}{\textbf{AUROC}} 
-    & \textbf{Tumor Type}  & baseline-tumor-type 
-        & unet-tumor-type-re & unet-tumor-type-eodd & unet-tumor-type-adv 
-        & pix2pix-tumor-type-re & pix2pix-tumor-type-eodd & pix2pix-tumor-type-adv 
-        & sde-tumor-type-re & sde-tumor-type-eodd & sde-tumor-type-adv \\
-    & \textbf{Tumor Grade} & baseline-tumor-grade 
-        & unet-tumor-grade-re & unet-tumor-grade-eodd & unet-tumor-grade-adv 
-        & pix2pix-tumor-grade-re & pix2pix-tumor-grade-eodd & pix2pix-tumor-grade-adv 
-        & sde-tumor-grade-re & sde-tumor-grade-eodd & sde-tumor-grade-adv \\ \cline{1-2}
+    & \textbf{Tumor Type} & baseline-ttype & unet-ttype-standard & unet-ttype-re & unet-ttype-eodd & unet-ttype-adv \\
+    & \textbf{Tumor Grade} & baseline-tgrade & unet-tgrade-standard & unet-tgrade-re & unet-tgrade-eodd & unet-tgrade-adv \\
+    \cline{1-2}
 
-    \multicolumn{2}{l|}{\textbf{Dice}} 
-        & \cellcolor[HTML]{C0C0C0} 
-        & unet-dice-re & unet-dice-eodd & unet-dice-adv 
-        & pix2pix-dice-re & pix2pix-dice-eodd & pix2pix-dice-adv 
-        & sde-dice-re & sde-dice-eodd & sde-dice-adv \\ \cline{1-2}
-    
-    \multicolumn{2}{l|}{\textbf{PSNR}} 
-        & \cellcolor[HTML]{C0C0C0} 
-        & unet-psnr-re & unet-psnr-eodd & unet-psnr-adv 
-        & pix2pix-psnr-re & pix2pix-psnr-eodd & pix2pix-psnr-adv 
-        & sde-psnr-re & sde-psnr-eodd & sde-psnr-adv \\ \cline{1-2}
+    \multicolumn{2}{l|}{\textbf{Dice}} & \cellcolor[HTML]{C0C0C0} 
+    & unet-dice-standard & unet-dice-re & unet-dice-eodd & unet-dice-adv \\
+    \cline{1-2}
 
-    \multicolumn{2}{l|}{\textbf{LPIPS}} 
-        & \cellcolor[HTML]{C0C0C0} 
-        & unet-lpips-re & unet-lpips-eodd & unet-lpips-adv 
-        & pix2pix-lpips-re & pix2pix-lpips-eodd & pix2pix-lpips-adv 
-        & sde-lpips-re & sde-lpips-eodd & sde-lpips-adv \\ \hline
-\end{tabular}
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} 
+    & unet-psnr-standard & unet-psnr-re & unet-psnr-eodd & unet-psnr-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} 
+    & unet-lpips-standard & unet-lpips-re & unet-lpips-eodd & unet-lpips-adv \\
+    \hline
+    \end{tabular}
+
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \caption{UCSF-PDGM performance change for bias mitigation using \textbf{Pix2Pix}}
+    \label{tab:ucsf_perf_pix2pix}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{Pix2Pix}} \\
+    \cline{4-7}
+    \multicolumn{2}{c|}{} 
+    & 
+    & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
+
+    \multirow{2}{*}{\textbf{AUROC}} 
+    & \textbf{Tumor Type} & baseline-ttype & pix2pix-ttype-standard & pix2pix-ttype-re & pix2pix-ttype-eodd & pix2pix-ttype-adv \\
+    & \textbf{Tumor Grade} & baseline-tgrade & pix2pix-tgrade-standard & pix2pix-tgrade-re & pix2pix-tgrade-eodd & pix2pix-tgrade-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{Dice}} & \cellcolor[HTML]{C0C0C0} 
+    & pix2pix-dice-standard & pix2pix-dice-re & pix2pix-dice-eodd & pix2pix-dice-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} 
+    & pix2pix-psnr-standard & pix2pix-psnr-re & pix2pix-psnr-eodd & pix2pix-psnr-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} 
+    & pix2pix-lpips-standard & pix2pix-lpips-re & pix2pix-lpips-eodd & pix2pix-lpips-adv \\
+    \hline
+    \end{tabular}
+
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \caption{UCSF-PDGM performance change for bias mitigation using \textbf{SDE}}
+    \label{tab:ucsf_perf_sde}
+    \begin{tabular}{ll|c|cccc}
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\textbf{Metrics}}} 
+    & \multirow{2}{*}{\textbf{Baseline}} 
+    & \multicolumn{4}{c}{\textbf{SDE}} \\
+    \cline{4-7}
+    \multicolumn{2}{c|}{} 
+    & 
+    & \textbf{STD} & \textbf{RE} & \textbf{EODD} & \textbf{ADV} \\
+    \hline
+
+    \multirow{2}{*}{\textbf{AUROC}} 
+    & \textbf{Tumor Type} & baseline-ttype & sde-ttype-standard & sde-ttype-re & sde-ttype-eodd & sde-ttype-adv \\
+    & \textbf{Tumor Grade} & baseline-tgrade & sde-tgrade-standard & sde-tgrade-re & sde-tgrade-eodd & sde-tgrade-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{Dice}} & \cellcolor[HTML]{C0C0C0} 
+    & sde-dice-standard & sde-dice-re & sde-dice-eodd & sde-dice-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{PSNR}} & \cellcolor[HTML]{C0C0C0} 
+    & sde-psnr-standard & sde-psnr-re & sde-psnr-eodd & sde-psnr-adv \\
+    \cline{1-2}
+
+    \multicolumn{2}{l|}{\textbf{LPIPS}} & \cellcolor[HTML]{C0C0C0} 
+    & sde-lpips-standard & sde-lpips-re & sde-lpips-eodd & sde-lpips-adv \\
+    \hline
+    \end{tabular}
+
+    \begin{tabular}{llllllll} 
+        \cellcolor[HTML]{E6C321} & $ \downarrow > 0.1$ & 
+        \cellcolor[HTML]{F1D892} &$+$, $0.05 \leq \downarrow < 0.1$ & 
+        \cellcolor[HTML]{3089A2} & $\uparrow < -0.1$  & 
+        \cellcolor[HTML]{93C1C9} & $-0.1 < \uparrow \leq -0.05$ \\
+    \end{tabular}
 \end{table}
