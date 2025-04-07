@@ -1,12 +1,12 @@
-name: ucsf_diffusion_8_reweighted_50
-results_path: /lotterlab/users/matteo/predictions_reweighted
+name: ucsf_diffusion_8_adv_e316
+results_path: /lotterlab/users/matteo/predictions_adv
 batch_size: 16
 num_workers: 4
 
 datasets:
   name: ucsf
   dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
-  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/ucsf/ucsf_SDE-8-reweight-50
+  processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/adv/ucsf/ucsf_SDE-8-adv-e316
   sampling_mask: radial  # or linear
   seed: 31415
   type: FLAIR  # or other MRI type

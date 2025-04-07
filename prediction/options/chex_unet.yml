@@ -1,5 +1,5 @@
-name: chex_unet_10000_reweighted_e10
-results_path: /lotterlab/users/matteo/predictions_reweighted
+name: chex_unet_10000_adv_e8
+results_path: /lotterlab/users/matteo/predictions_fairness
 batch_size: 8
 num_workers: 2
 
@@ -14,7 +14,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/models/Reweighted/Chex/unet-fairness-chex-10000-reweight_20250220_114754/checkpoints/unet-fairness-chex-10000-reweight_20250220_114754_epoch_10.pth
+  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-chex-10000-adv_20250323_112341/checkpoints/unet-fairness-chex-10000-adv_20250323_112341_epoch_8_best.pth
 task_models: 
   name: chexpert-classifier
   path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt
