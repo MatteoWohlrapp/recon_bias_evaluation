@@ -1,0 +1,74 @@
+name: ucsf-mitigation-visualization
+results_path: /lotterlab/users/matteo/visualizations
+
+target_column: "UNet_recon_dice"  # This will be used for UNet comparisons
+target_columns:  # One for each reconstruction method
+  UNet: "UNet_recon_dice"
+  GAN: "UNet_recon_dice"
+  Diffusion: "UNet_recon_dice"
+
+standard_csvs:
+  UNet: /lotterlab/users/matteo/predictions/ucsf_unet_8_20250207_150102/ucsf_unet_8_results.csv
+  GAN: /lotterlab/users/matteo/predictions/ucsf_gan_8_20250207_150001/ucsf_gan_8_results.csv
+  Diffusion: /lotterlab/users/matteo/predictions/ucsf_diffusion_8_20250207_145910/ucsf_diffusion_8_results.csv
+
+mitigation_csvs:
+  UNet:
+    - /lotterlab/users/matteo/predictions_reweighted/unet_unet_08_reweighted_e7_20250403_152816/unet_unet_08_reweighted_e7_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/unet_unet_08_t03_normalized_e1_20250408_155242/unet_unet_08_t03_normalized_e1_results.csv
+    - /lotterlab/users/matteo/predictions_adv/ucsf_unet_08_adv_opt_e1_20250412_082802/ucsf_unet_08_adv_opt_e1_results.csv
+  GAN:
+    - /lotterlab/users/matteo/predictions_reweighted/ucsf_gan_8_reweighted_200_20250224_100308/ucsf_gan_8_reweighted_200_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/ucsf_gan_08_t03_ce05_e200_20250321_093213/gan_fairness-ucsf-08-l0005-t03-ce05_results.csv
+    - /lotterlab/users/matteo/predictions_adv/gan_ucsf_08_l1000_adv_opt_20250409_183103/gan_ucsf_08_l1000_adv_opt_results.csv
+  Diffusion:
+    - /lotterlab/users/matteo/predictions_reweighted/ucsf_diffusion_8_reweighted_161_20250224_100406/ucsf_diffusion_8_reweighted_161_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/ucsf_diffusion_8_eodd_e160-normalized_20250412_092010/ucsf_diffusion_8_eodd_e160-normalized_results.csv
+    - /lotterlab/users/matteo/predictions_adv/ucsf_diffusion_8_adv_e316_20250407_033952/ucsf_diffusion_8_adv_e316_results.csv
+
+datasets:
+  name: "ucsf"
+  dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  sampling_mask: radial
+  seed: 31415
+  type: FLAIR
+  pathology: []
+  lower_slice: 60
+  upper_slice: 130
+  split: test
+  num_rays: 60
+
+models:
+  standard:
+    - network: "UNet"
+      model_path: /lotterlab/users/matteo/models/Noise/UCSF/Unet/unet-8_20250106_102815/checkpoints/unet-8_20250106_102815_epoch_11_best.pth
+    - network: "GAN"
+      model_path: /lotterlab/users/matteo/models/Noise/UCSF/GAN/UCSF-8/latest_net_G.pth
+    - network: "Diffusion"
+      processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/fairness/ucsf/ucsf_SDE-8-fairness-160
+  mitigations:
+    UNet:
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/Reweighted/UCSF/unet-fairness-ucsf-08-reweight_20250403_130811/checkpoints/unet-fairness-ucsf-08-reweight_20250403_130811_epoch_7_best.pth
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/EODD-Fairness/unet-fairness-ucsf-08-t03-normalized_20250407_171124/checkpoints/unet-fairness-ucsf-08-t03-normalized_20250407_171124_epoch_1_best.pth
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/unet-fairness-ucsf-08-adv-opt_20250412_071904/checkpoints/unet-fairness-ucsf-08-adv-opt_20250412_071904_epoch_1_best.pth
+    GAN:
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/Reweighted/UCSF/pix2pix-ucsf-08-l1000-reweight/200_net_G.pth
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/EODD-Fairness/pix2pix-ucsf8-128-l1000-fairness-t03-ce05/200_net_G.pth
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/pix2pix-ucsf8-128-l1000-fairness-adv-opt/200_net_G.pth
+    Diffusion:
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/ucsf/ucsf_SDE-8-reweight-161
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/eodd/ucsf/ucsf_SDE-8-eodd-e160-normalized
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/adv/ucsf/ucsf_SDE-8-adv-e316
+
+task_model:
+  name: segmentation
+  path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth

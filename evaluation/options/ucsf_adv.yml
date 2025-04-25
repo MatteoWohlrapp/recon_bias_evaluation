@@ -1,0 +1,19 @@
+
+name: ucsf-evaluation_adv_opt
+results_path: /lotterlab/users/matteo/evaluations_adv
+
+mode: ucsf
+
+predictions: 
+    - acceleration: 8
+      model: unet
+      predictions: '/lotterlab/users/matteo/predictions_adv/ucsf_unet_08_adv_opt_e1_20250412_082802/ucsf_unet_08_adv_opt_e1_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: pix2pix
+      predictions: '/lotterlab/users/matteo/predictions_adv/gan_ucsf_08_l1000_adv_opt_20250409_183103/gan_ucsf_08_l1000_adv_opt_results.csv'
+      fairness: True
+    - acceleration: 8
+      model: sde
+      predictions: '/lotterlab/users/matteo/predictions_adv/ucsf_diffusion_8_adv_opt_e290_20250412_190902/ucsf_diffusion_8_adv_opt_e290_results.csv'
+      fairness: True

@@ -11,7 +11,7 @@ predictions:
       fairness: True
     - photon_count: 10000
       model: pix2pix
-      predictions: '/lotterlab/users/matteo/predictions_reweighted/chex_gan_10000_reweighted_100_20250227_171922/chex_gan_10000_reweighted_100_results.csv'
+      predictions: '/lotterlab/users/matteo/predictions_reweighted/chex_gan_10000_reweighted_e200_20250401_052638/gan_fairness-chex-10000-reweight-e200_results.csv'
       fairness: True
     - photon_count: 10000
       model: sde

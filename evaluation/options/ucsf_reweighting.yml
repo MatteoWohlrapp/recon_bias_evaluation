@@ -7,7 +7,7 @@ mode: ucsf
 predictions: 
     - acceleration: 8
       model: unet
-      predictions: '/lotterlab/users/matteo/predictions_reweighted/ucsf_unet_8_reweighted_e10_20250310_095836/ucsf_unet_8_reweighted_e10_results.csv'
+      predictions: '/lotterlab/users/matteo/predictions_reweighted/unet_unet_08_reweighted_e7_20250403_152816/unet_unet_08_reweighted_e7_results.csv'
       fairness: True
     - acceleration: 8
       model: pix2pix
