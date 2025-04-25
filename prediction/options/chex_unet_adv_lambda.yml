@@ -1,0 +1,20 @@
+name: chex_unet_10000_adv_e8_lambda_opt_<lambda>
+results_path: /lotterlab/users/matteo/predictions_adv_lambda_opt
+batch_size: 8
+num_workers: 2
+
+datasets:
+  name: chex
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
+  dataroot_B: /lotterlab/datasets/
+  seed: 31415
+  split: test
+
+models:
+  network: UNet
+  model_path: <path_to_model>
+task_models: 
+  name: chexpert-classifier
+  path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt
