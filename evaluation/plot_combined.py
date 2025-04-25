@@ -148,7 +148,7 @@ def plot_combined_fairness_classifier(combined_results, results_dir):
 
     g.map_dataframe(plot_bars)
 
-    col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
+    col_names = {"gender": "Sex", "age": "Age", "ethnicity": "Race"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold
@@ -156,7 +156,7 @@ def plot_combined_fairness_classifier(combined_results, results_dir):
         ax.set_title(title, fontweight="bold", pad=20, fontsize=20)
 
     # Add y-axis label to the leftmost plot with bold font
-    g.axes[0, 0].set_ylabel("Additional Bias", fontweight="bold")
+    g.axes[0, 0].set_ylabel("Bias Change (Absolute)", fontweight="bold")
 
     # Remove legends from all subplots
     for ax in g.axes.flat:
@@ -330,7 +330,7 @@ def plot_combined_segmentation(combined_results, results_dir):
 
     g.map_dataframe(plot_bars)
 
-    col_names = {"gender": "Gender", "age": "Age"}
+    col_names = {"gender": "Sex", "age": "Age"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold
@@ -338,7 +338,7 @@ def plot_combined_segmentation(combined_results, results_dir):
         ax.set_title(title, fontweight="bold", pad=20, fontsize=20)
 
     # Add y-axis label to the leftmost plot with bold font
-    g.axes[0, 0].set_ylabel("Additional Bias", fontweight="bold")
+    g.axes[0, 0].set_ylabel("Bias Change (Absolute)", fontweight="bold")
 
     # Remove legends from all subplots
     for ax in g.axes.flat:
@@ -836,7 +836,7 @@ def plot_combined_fairness_classifier_with_baseline(combined_results, results_di
 
     g.map_dataframe(plot_bars_with_baseline)
 
-    col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
+    col_names = {"gender": "Sex", "age": "Age", "ethnicity": "Race"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold
@@ -844,7 +844,7 @@ def plot_combined_fairness_classifier_with_baseline(combined_results, results_di
         ax.set_title(title, fontweight="bold", pad=20, fontsize=20)
 
     # Add y-axis label to the leftmost plot with bold font
-    g.axes[0, 0].set_ylabel("Bias Metric Value", fontweight="bold")
+    g.axes[0, 0].set_ylabel("Bias Change (Absolute)", fontweight="bold")
 
     # Remove legends from all subplots
     for ax in g.axes.flat:
@@ -1073,7 +1073,7 @@ def plot_combined_segmentation_with_baseline(combined_results, results_dir):
 
     g.map_dataframe(plot_bars_with_baseline)
 
-    col_names = {"gender": "Gender", "age": "Age"}
+    col_names = {"gender": "Sex", "age": "Age"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold
@@ -1081,7 +1081,7 @@ def plot_combined_segmentation_with_baseline(combined_results, results_dir):
         ax.set_title(title, fontweight="bold", pad=20, fontsize=20)
 
     # Add y-axis label to the leftmost plot with bold font
-    g.axes[0, 0].set_ylabel("Bias Metric Value", fontweight="bold")
+    g.axes[0, 0].set_ylabel("Bias Change (Absolute)", fontweight="bold")
 
     # Remove legends from all subplots
     for ax in g.axes.flat:
@@ -1322,7 +1322,7 @@ def plot_combined_fairness_classifier_std_err_with_baseline(combined_results, re
 
     g.map_dataframe(plot_bars_with_baseline)
 
-    col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
+    col_names = {"gender": "Sex", "age": "Age", "ethnicity": "Race"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold
@@ -1569,7 +1569,7 @@ def plot_combined_segmentation_std_err_with_baseline(combined_results, results_d
 
     g.map_dataframe(plot_bars_with_baseline)
 
-    col_names = {"gender": "Gender", "age": "Age"}
+    col_names = {"gender": "Sex", "age": "Age"}
     g.set_titles(template="{col_name}")
 
     # Add column titles and make them bold

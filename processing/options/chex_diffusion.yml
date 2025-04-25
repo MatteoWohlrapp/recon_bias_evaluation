@@ -1,6 +1,6 @@
-name: chex_SDE-10000-reweighted-20
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/chex
-batch_size: 16
+name: chex_SDE-10000-eodd-e40-normalized
+results_path: /lotterlab/project_data/reconstruction_bias/processed_images/eodd/chex
+batch_size: 32
 num_workers: 4
 
 paths:
@@ -45,5 +45,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/models/Reweighted/Chex/chex10000-sde-reweight/models/20_G.pth
+  pretrain_model_G: /lotterlab/users/matteo/code/image-restoration-sde/experiments/deblurring/chex10000-sde-fairness-eodd/models/40_G.pth
   strict_load: True

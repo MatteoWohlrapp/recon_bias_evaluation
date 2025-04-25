@@ -378,7 +378,7 @@ def save_analysis_images(row_idx, image_A, image_B, reconstructed_imgs, classifi
             _, prediction_mask = compute_gradcam(classifier, recon_img)
             save_image(prediction_mask, case_dir / f"{row_idx}_prediction.png")
             # Create and save overlay for prediction
-            pred_overlay = create_segmentation_overlay(original_img, recon_img)
+            pred_overlay = create_segmentation_overlay(original_img, prediction_mask)
             save_image(pred_overlay, case_dir / f"{row_idx}_prediction_overlay.png")
         else:
             _, gradcam = compute_gradcam(classifier, recon_img)

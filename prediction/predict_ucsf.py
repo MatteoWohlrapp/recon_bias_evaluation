@@ -132,11 +132,20 @@ def predict_ucsf(
                         batch_results[i][f"{model_name}_recon_sum"] = float(sum_val)
 
             for i in range(batch_size):
+
                 batch_results[i]["psnr"] = peak_signal_noise_ratio(
                     y_recon[i].cpu().detach().numpy().squeeze(),
                     recon[i].cpu().detach().numpy().squeeze(),
                     data_range=1,
                 )
+                # print(batch_results[i]["psnr"])
+                # print(f"min: {np.min(y_recon[i].cpu().detach().numpy().squeeze())}")
+                # print(f"max: {np.max(y_recon[i].cpu().detach().numpy().squeeze())}")
+                # print(f"mean: {np.mean(y_recon[i].cpu().detach().numpy().squeeze())}")
+                # print(f"min: {np.min(recon[i].cpu().detach().numpy().squeeze())}")
+                # print(f"max: {np.max(recon[i].cpu().detach().numpy().squeeze())}")
+                # print(f"mean: {np.mean(recon[i].cpu().detach().numpy().squeeze())}")
+                # exit()
                 batch_results[i]["ssim"] = structural_similarity(
                     y_recon[i].cpu().detach().numpy().squeeze(),
                     recon[i].cpu().detach().numpy().squeeze(),

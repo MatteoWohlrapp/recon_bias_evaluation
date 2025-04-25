@@ -1,7 +1,7 @@
-name: gan_fairness-chex-10000-adv-opt
-results_path: /lotterlab/users/matteo/predictions_adv
-batch_size: 16
-num_workers: 4
+name: chex_unet_10000_adv_e8_lambda_opt_<lambda>
+results_path: /lotterlab/users/matteo/predictions_adv_lambda_opt
+batch_size: 8
+num_workers: 2
 
 datasets:
   name: chex
@@ -13,9 +13,8 @@ datasets:
   split: test
 
 models:
-  network: GAN
-  model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/pix2pix-chex10000-128-l1000-adv-opt/200_net_G.pth
-
+  network: UNet
+  model_path: <path_to_model>
 task_models: 
   name: chexpert-classifier
   path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt
