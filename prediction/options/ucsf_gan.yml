@@ -1,11 +1,11 @@
-name: gan_ucsf_08_l1000_adv_opt
-results_path: /lotterlab/users/matteo/predictions_adv
+name: gan_ucsf
+results_path: ../predictions
 batch_size: 16
 num_workers: 4
 
 datasets:
   name: ucsf
-  dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  dataroot: ../UCSF-PDGM
   sampling_mask: radial  # or linear
   seed: 31415
   type: FLAIR  # or other MRI type
@@ -17,17 +17,17 @@ datasets:
 
 models:
   network: GAN
-  model_path: /lotterlab/users/matteo/code/pix2pix/checkpoints/pix2pix-ucsf8-128-l1000-fairness-adv-opt/200_net_G.pth
+  model_path: ../models/Pix2Pix.pth
   
 task_models: 
   name: ucsf
   models: 
     - type: classifier
       name: TGradeBCEClassifier
-      path: /lotterlab/users/matteo/models/tgrade/checkpoints/tgrade_test_20240925_113550_epoch_1_best.pth
+      path: ../models/tgrade/checkpoints/tgrade.pth
     - type: classifier
       name: TTypeBCEClassifier
-      path: /lotterlab/users/matteo/models/ttype/checkpoints/ttype_test_20240925_113544_epoch_1_best.pth
+      path: ../models/ttype/checkpoints/ttype.pth
     - type: segmentation
       name: UNet
-      path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth
+      path: ../models/segmentation/segmentation.pth

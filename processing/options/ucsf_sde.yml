@@ -1,16 +1,16 @@
-name: ucsf_SDE-8-eodd-e160-normalized
-results_path: /lotterlab/project_data/reconstruction_bias/processed_images/eodd/ucsf
+name: ucsf_SDE  
+results_path: ../processed_images/eodd/ucsf
 batch_size: 16
 num_workers: 4
 
-paths:
-  recon_bias: /lotterlab/users/matteo/code/recon_bias
-  pix2pix: /lotterlab/users/matteo/code/pix2pix
-  sde: /lotterlab/users/matteo/code/image-restoration-sde
+paths:  
+  recon_bias: ../recon_bias
+  pix2pix: ../pix2pix
+  sde: ../image-restoration-sde
 
 datasets:
   name: ucsf
-  dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  dataroot: ../UCSF-PDGM
   sampling_mask: radial  # or linear
   seed: 31415
   type: FLAIR  # or other MRI type
@@ -48,5 +48,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /lotterlab/users/matteo/code/image-restoration-sde/experiments/deblurring/ucsf-sde-8-fairness-eodd/models/160_G.pth
+  pretrain_model_G: ../image-restoration-sde.pth
   strict_load: True

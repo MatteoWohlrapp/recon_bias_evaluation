@@ -1,11 +1,11 @@
-name: ucsf_unet_08_adv_opt_e1
-results_path: /lotterlab/users/matteo/predictions_adv
+name: ucsf_unet
+results_path: ../predictions
 batch_size: 64
 num_workers: 8
 
 datasets:
   name: ucsf
-  dataroot: /lotterlab/users/matteo/data/UCSF-PDGM
+  dataroot: ../UCSF-PDGM
   sampling_mask: radial
   seed: 31415
   type: FLAIR
@@ -17,17 +17,17 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/unet-fairness-ucsf-08-adv-opt_20250412_071904/checkpoints/unet-fairness-ucsf-08-adv-opt_20250412_071904_epoch_1_best.pth
+  model_path: ../models/U-Net.pth
 task_models: 
   name: ucsf
   models: 
     - type: classifier
       name: TGradeBCEClassifier
-      path: /lotterlab/users/matteo/models/tgrade/checkpoints/tgrade_test_20240925_113550_epoch_1_best.pth
+      path: ../models/tgrade/checkpoints/tgrade.pth
     - type: classifier
       name: TTypeBCEClassifier
-      path: /lotterlab/users/matteo/models/ttype/checkpoints/ttype_test_20240925_113544_epoch_1_best.pth
+      path: ../models/ttype/checkpoints/ttype.pth
     - type: segmentation
       name: UNet
-      path: /lotterlab/users/matteo/models/segmentation_skews/segmentation_20241126_225621/checkpoints/segmentation_20241126_225621_epoch_11.pth
+      path: ../models/segmentation/segmentation.pth
     

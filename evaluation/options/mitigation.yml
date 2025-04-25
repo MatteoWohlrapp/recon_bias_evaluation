@@ -1,32 +1,32 @@
 
 name: evaluation_mitigation
 
-results_path: /lotterlab/users/matteo/evaluations_mitigation_combined
+results_path: ../evaluations_mitigation
 
 mode: mitigation
 
 
 fairness:
     chex:
-        csv_standard: /lotterlab/users/matteo/evaluations/chex-evaluation_20250225_122247/chex-evaluation_fairness_results.csv
-        csv_eodd: /lotterlab/users/matteo/evaluations_eodd/chex-evaluation-eodd_20250412_101826/chex-evaluation-eodd_fairness_results.csv
-        csv_reweighted: /lotterlab/users/matteo/evaluations_reweighted/chex-evaluation_reweighting_20250404_091513/chex-evaluation_reweighting_fairness_results.csv
-        csv_adv: /lotterlab/users/matteo/evaluations_adv/chex-evaluation_adv_opt_20250414_043620/chex-evaluation_adv_opt_fairness_results.csv
+        csv_standard: ../evaluations/chex-evaluation_fairness_results.csv
+        csv_eodd: ../evaluations_eodd/chex-evaluation-eodd_fairness_results.csv
+        csv_reweighted: ../evaluations_reweighted/chex-evaluation_reweighting_fairness_results.csv
+        csv_adv: ../evaluations_adv/chex-evaluation_adv_opt_fairness_results.csv
 
     ucsf:
-        csv_standard: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250225_122332/ucsf-evaluation_fairness_results.csv
-        csv_eodd: /lotterlab/users/matteo/evaluations_eodd/ucsf-evaluation-eodd_20250412_101843/ucsf-evaluation-eodd_fairness_results.csv
-        csv_reweighted: /lotterlab/users/matteo/evaluations_reweighted/ucsf-evaluation_reweighting_20250404_091339/ucsf-evaluation_reweighting_fairness_results.csv
-        csv_adv: /lotterlab/users/matteo/evaluations_adv/ucsf-evaluation_adv_opt_20250414_043853/ucsf-evaluation_adv_opt_fairness_results.csv
+        csv_standard: ../evaluations/ucsf-evaluation_fairness_results.csv
+        csv_eodd: ../evaluations_eodd/ucsf-evaluation-eodd_fairness_results.csv
+        csv_reweighted: ../evaluations_reweighted/ucsf-evaluation_reweighting_fairness_results.csv
+        csv_adv: ../evaluations_adv/ucsf-evaluation_adv_opt_fairness_results.csv
 
 performance: 
     chex:
-        csv_standard: /lotterlab/users/matteo/evaluations/chex-evaluation_20250225_122247/chex-evaluation_performance_results.csv
-        csv_eodd: /lotterlab/users/matteo/evaluations_eodd/chex-evaluation-eodd_20250412_101826/chex-evaluation-eodd_performance_results.csv
-        csv_reweighted: /lotterlab/users/matteo/evaluations_reweighted/chex-evaluation_reweighting_20250404_091513/chex-evaluation_reweighting_performance_results.csv
-        csv_adv: /lotterlab/users/matteo/evaluations_adv/chex-evaluation_adv_opt_20250414_043620/chex-evaluation_adv_opt_performance_results.csv
+        csv_standard: ../evaluations/chex-evaluation_performance_results.csv
+        csv_eodd: ../evaluations_eodd/chex-evaluation-eodd_performance_results.csv
+        csv_reweighted: ../evaluations_reweighted/chex-evaluation_reweighting_performance_results.csv
+        csv_adv: ../evaluations_adv/chex-evaluation_adv_opt_performance_results.csv
     ucsf:
-        csv_standard: /lotterlab/users/matteo/evaluations/ucsf-evaluation_20250225_122332/ucsf-evaluation_performance_results.csv
-        csv_eodd: /lotterlab/users/matteo/evaluations_eodd/ucsf-evaluation-eodd_20250412_101843/ucsf-evaluation-eodd_performance_results.csv
-        csv_reweighted: /lotterlab/users/matteo/evaluations_reweighted/ucsf-evaluation_reweighting_20250404_091339/ucsf-evaluation_reweighting_performance_results.csv
-        csv_adv: /lotterlab/users/matteo/evaluations_adv/ucsf-evaluation_adv_opt_20250414_043853/ucsf-evaluation_adv_opt_performance_results.csv
+        csv_standard: ../evaluations/ucsf-evaluation_performance_results.csv
+        csv_eodd: ../evaluations_eodd/ucsf-evaluation-eodd_performance_results.csv
+        csv_reweighted: ../evaluations_reweighted/ucsf-evaluation_reweighting_performance_results.csv
+        csv_adv: ../evaluations_adv/ucsf-evaluation_adv_opt_performance_results.csv
