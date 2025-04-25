@@ -70,6 +70,15 @@ def plot_ucsf_performance(results, results_dir, name):
             data1["value"] = (data1["value_tgrade"] + data1["value_ttype"]) / 2
             data1["metric"] = "auroc-avg"
         else:
+            # Get baseline value for metric1 if it's not auroc-avg
+            baseline_value = None
+            if metric1 in ["tgrade", "ttype", "dice"]:
+                baseline_data = results[
+                    (results["metric"] == metric1) & (results["model"] == "baseline")
+                ]
+                if not baseline_data.empty:
+                    baseline_value = baseline_data["value"].iloc[0]
+            
             # Original data filtering
             data1 = results[
                 (results["metric"] == metric1) & (results["model"] != "baseline")
@@ -198,6 +207,17 @@ def plot_ucsf_performance(results, results_dir, name):
         # Adjust layout to prevent legend overlap
         plt.tight_layout()
 
+        # Add baseline reference line if available
+        if metric1 != "auroc-avg" and baseline_value is not None:
+            ax1.axhline(
+                y=baseline_value,
+                color="gray",
+                linestyle="--",
+                linewidth=1.5,
+                alpha=0.5,
+                zorder=0,
+            )
+
         # Save plots in both formats
         for fmt in ["eps", "pdf", "png"]:
             save_dir = os.path.join(results_dir, "ucsf_performance", fmt)
@@ -236,6 +256,15 @@ def plot_ucsf_performance(results, results_dir, name):
             linestyle="--",
             marker="s",
             label=metric_labels[metric2],
+        ),
+        Line2D(
+            [0],
+            [0],
+            color="gray",
+            linestyle="--",
+            label="Baseline",
+            alpha=0.5,
+            linewidth=1.5,
         ),
     ]
 
@@ -408,7 +437,7 @@ def plot_ucsf_additional_bias(results, results_dir, name):
         g.map_dataframe(plot_bars)
 
         # Update title style
-        col_names = {"gender": "Gender", "age": "Age"}
+        col_names = {"gender": "Sex", "age": "Age"}
         g.set_titles(template="{col_name}")
 
         # Add column titles with bold font and smaller size
@@ -424,7 +453,7 @@ def plot_ucsf_additional_bias(results, results_dir, name):
         )
 
         # Make y-axis label bold
-        g.axes[0, 0].set_ylabel("Additional Bias", fontweight="bold")
+        g.axes[0, 0].set_ylabel("Bias Change", fontweight="bold")
 
         # Remove legend from main plots
         for ax in g.axes.flat:

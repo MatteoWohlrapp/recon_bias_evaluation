@@ -1,7 +1,7 @@
-name: unet_unet_08_reweighted_e7
-results_path: /lotterlab/users/matteo/predictions_reweighted
-batch_size: 8
-num_workers: 2
+name: ucsf_unet_08_adv_opt_e1
+results_path: /lotterlab/users/matteo/predictions_adv
+batch_size: 64
+num_workers: 8
 
 datasets:
   name: ucsf
@@ -17,7 +17,7 @@ datasets:
 
 models:
   network: UNet
-  model_path: /lotterlab/users/matteo/code/recon_bias/output/unet-fairness-ucsf-08-reweight_20250403_130811/checkpoints/unet-fairness-ucsf-08-reweight_20250403_130811_epoch_7_best.pth
+  model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/unet-fairness-ucsf-08-adv-opt_20250412_071904/checkpoints/unet-fairness-ucsf-08-adv-opt_20250412_071904_epoch_1_best.pth
 task_models: 
   name: ucsf
   models: 

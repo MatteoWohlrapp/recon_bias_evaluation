@@ -1,0 +1,76 @@
+name: chex-mitigation-visualization
+results_path: /lotterlab/users/matteo/visualizations
+
+target_column: "Lung Lesion_recon"  # Default for backwards compatibility
+target_columns:
+  UNet: "Lung Lesion_recon"
+  GAN: "Lung Lesion_recon"
+  Diffusion: "Lung Lesion_recon"
+
+datasets:
+  name: "chex"  # or "ucsf"
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
+  dataroot_B: /lotterlab/datasets/
+
+standard_csvs:
+  UNet: /lotterlab/users/matteo/predictions/chex_unet_10000_20250212_155033/chex_unet_10000_results.csv
+  GAN: /lotterlab/users/matteo/predictions/chex_gan_10000_20250204_201346/chex_gan_10000_results.csv
+  Diffusion: /lotterlab/users/matteo/predictions/chex_diffusion_10000_20250204_210108/chex_diffusion_10000_results.csv
+
+mitigation_csvs:
+  UNet:
+    - /lotterlab/users/matteo/predictions_reweighted/chex_unet_10000_reweighted_e10_20250227_170807/chex_unet_10000_reweighted_e10_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/chex_unet_10000_l0005_t03_ce05_e04_20250224_162316/chex_unet_10000_l0005_t03_ce05_e04_results.csv
+    - /lotterlab/users/matteo/predictions_adv/chex_unet_10000_adv_e3_opt_20250409_182006/chex_unet_10000_adv_e3_opt_results.csv
+  GAN:
+    - /lotterlab/users/matteo/predictions_reweighted/chex_gan_10000_reweighted_e200_20250401_052638/gan_fairness-chex-10000-reweight-e200_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/chex_gan_10000_t03_ce05_e200_20250321_094300/gan_fairness-chex-10000-t03-ce05_results.csv
+    - /lotterlab/users/matteo/predictions_adv/gan_fairness-chex-10000-adv-opt_20250409_182217/gan_fairness-chex-10000-adv-opt_results.csv
+  Diffusion:
+    - /lotterlab/users/matteo/predictions_reweighted/chex_diffusion_10000_reweighted_40_20250225_111107/chex_diffusion_10000_reweighted_40_results.csv
+    - /lotterlab/users/matteo/predictions-EODD-fairness/chex_diffusion_10000_eodd_e40-normalized_20250412_092819/chex_diffusion_10000_eodd_e40-normalized_results.csv
+    - /lotterlab/users/matteo/predictions_adv/chex_diffusion_10000_adv_e40_20250407_033718/chex_diffusion_10000_adv_e40_results.csv
+
+datasets:
+  name: "chex"
+  csv_path_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_B: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_A: /lotterlab/project_data/reconstruction_bias/CheXpert_noise
+  dataroot_B: /lotterlab/datasets/
+
+models:
+  standard:
+    - network: "UNet"
+      model_path: /lotterlab/users/matteo/models/Noise/Chex/unet-chex-10000_20250210_170539/checkpoints/unet-chex-10000_20250210_170539_epoch_20_best.pth
+    - network: "GAN"
+      model_path: /lotterlab/users/matteo/models/Noise/Chex/GAN/10000/chex10000-128-l1000-200_net_G.pth
+    - network: "Diffusion"
+      processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/chex/chex_SDE-10000-40
+  mitigations:
+    UNet:
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/Reweighted/Chex/unet-fairness-chex-10000-reweight_20250220_114754/checkpoints/unet-fairness-chex-10000-reweight_20250220_114754_epoch_18_best.pth
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/EODD-Fairness/unet-fairness-chex-10000-l0005-t03-ce05_20250224_113146/checkpoints/unet-fairness-chex-10000-l0005-t03-ce05_20250224_113146_epoch_4_best.pth
+      - network: "UNet"
+        model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/unet-fairness-chex-10000-adv-opt_20250408_174312/checkpoints/unet-fairness-chex-10000-adv-opt_20250408_174312_epoch_3_best.pth
+    GAN:
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/Reweighted/Chex/pix2pix-chex10000-128-l1000-reweight-0401/200_net_G.pth
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/EODD-Fairness/pix2pix-chex10000-128-l1000-fairness-t03-ce05/200_net_G.pth
+      - network: "GAN"
+        model_path: /lotterlab/users/matteo/models/ADV-Fairness/additional-optimizer/pix2pix-chex10000-128-l1000-adv-opt/200_net_G.pth
+    Diffusion:
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/reweight/chex/chex_SDE-10000-reweighted-40
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/eodd/chex/chex_SDE-10000-eodd-e40-normalized
+      - network: "Diffusion"
+        processed_image_root: /lotterlab/project_data/reconstruction_bias/processed_images/adv/chex/chex_SDE-10000-adv-e40
+
+task_model:
+  name: chexpert-classifier
+  path: /lotterlab/users/matteo/code/torchxrayvision/output/class_norm01/chex-densenet-class_norm01-best.pt

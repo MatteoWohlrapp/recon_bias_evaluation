@@ -70,6 +70,14 @@ def plot_chex_performance(results, results_dir, name):
         if metric != "average":
             plt.title(metric_labels[metric].title(), fontweight="bold", pad=20)
 
+        # Get baseline value if not average
+        baseline_value = None
+        baseline_data = results[
+            (results["metric"] == metric) & (results["model"] == "baseline")
+        ]
+        if not baseline_data.empty:
+            baseline_value = baseline_data["value"].iloc[0]
+
         # Filter data for the current metrics
         data1 = results[
             (results["metric"] == metric) & (results["model"] != "baseline")
@@ -204,6 +212,16 @@ def plot_chex_performance(results, results_dir, name):
         # Adjust layout to prevent legend overlap
         plt.tight_layout()
 
+        # Add baseline reference line if available
+        ax1.axhline(
+            y=baseline_value,
+            color="gray",
+            linestyle="--",
+            linewidth=1.5,
+            alpha=0.5,
+            zorder=0,
+        )
+
         # Save plots in both formats
         for fmt in ["eps", "pdf", "png"]:
             save_dir = os.path.join(results_dir, "chex_performance", fmt)
@@ -229,6 +247,15 @@ def plot_chex_performance(results, results_dir, name):
     metric_lines = [
         Line2D([0], [0], color="gray", linestyle="-", marker="o", label="AUROC"),
         Line2D([0], [0], color="gray", linestyle="--", marker="s", label="PSNR"),
+        Line2D(
+            [0],
+            [0],
+            color="gray",
+            linestyle="--",
+            label="Baseline",
+            alpha=0.5,
+            linewidth=1.5,
+        ),
     ]
 
     # Create horizontal legend
@@ -418,7 +445,7 @@ def plot_chex_additional_bias(results, results_dir, name):
 
         g.map_dataframe(plot_bars)
 
-        col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
+        col_names = {"gender": "Sex", "age": "Age", "ethnicity": "Race"}
         g.set_titles(template="{col_name}")
 
         # Add column titles and make them bold, with smaller font size
@@ -437,7 +464,7 @@ def plot_chex_additional_bias(results, results_dir, name):
             )
 
         # Add y-axis label to the leftmost plot with bold font
-        g.axes[0, 0].set_ylabel("Additional Bias", fontweight="bold")
+        g.axes[0, 0].set_ylabel("Bias Change", fontweight="bold")
 
         # Only show legend for average plot
         """if interpreter == "average":

@@ -1,10 +1,8 @@
 
-name: chex-evaluation-eodd-fairness-10000
-results_path: /lotterlab/users/matteo/evaluations_fairness
+name: chex-evaluation-eodd
+results_path: /lotterlab/users/matteo/evaluations_eodd
 
 mode: chex
-
-#fairness_path: /lotterlab/users/matteo/evaluations/chex-evaluation_20250214_163703/chex-evaluation_fairness_results.csv
 
 predictions: 
     - photon_count: 10000
@@ -17,5 +15,5 @@ predictions:
       fairness: True
     - photon_count: 10000
       model: sde
-      predictions: '/lotterlab/users/matteo/predictions-EODD-fairness/chex_diffusion_10000_t03_ce05_e40_20250323_124051/chex_diffusion_10000_t03_ce05_e40_results.csv'
+      predictions: '/lotterlab/users/matteo/predictions-EODD-fairness/chex_diffusion_10000_eodd_e40-normalized_20250412_092819/chex_diffusion_10000_eodd_e40-normalized_results.csv'
       fairness: True

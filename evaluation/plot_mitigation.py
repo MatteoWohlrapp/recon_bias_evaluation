@@ -290,7 +290,7 @@ def plot_fairness_change_mitigation(original_df, reweighted_df, eodd_df, adv_df,
         g.map_dataframe(plot_bars)
         
         # Set titles and labels
-        col_names = {"gender": "Gender", "age": "Age", "ethnicity": "Race"}
+        col_names = {"gender": "Sex", "age": "Age", "ethnicity": "Race"}
         g.set_titles(template="{col_name}")
         
         for ax, title in zip(g.axes.flat, [col_names[col] for col in g.col_names]):
@@ -350,8 +350,8 @@ def plot_fairness_change_mitigation(original_df, reweighted_df, eodd_df, adv_df,
     # Then add mitigation types with gray tones (from light to dark)
     for mitigation_type, label in [
         ("reweighted", "Reweighted"),  # Light
-        ("eodd", "EODD"),              # Medium
-        ("adv", "Adversarial")         # Dark
+        ("eodd", "EODD Loss"),              # Medium
+        ("adv", "Adversarial Loss")         # Dark
     ]:
         legend_elements.append(
             plt.Rectangle((0, 0), 1, 1, color=mitigation_colors[mitigation_type], 
@@ -947,45 +947,56 @@ def create_shared_legend(results_dir):
     }
 
     # Create figure for legend
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 3))
     ax = plt.gca()
-    ax.set_axis_off()  # Hide axes
+    ax.set_axis_off()
     
-    # Create legend elements
+    # Create all legend elements in a grid
     legend_elements = []
+    labels = []
     
-    # Model colors
+    # First column: Models
     for model in sorted(model_colors.keys()):
         legend_elements.append(
             plt.Line2D([0], [0], marker='o', color='w', 
                       markerfacecolor=model_colors[model], markersize=15, 
-                      label=f"Model: {model_map.get(model, model)}")
+                      label=model_map.get(model, model))
         )
+        labels.append(model_map.get(model, model))
     
-    # Dataset styles
+    # Add empty elements to align with other rows
+    while len(legend_elements) < 3:
+        legend_elements.append(plt.Line2D([0], [0], color='none'))
+        labels.append("")
+    
+    # Second column: Datasets
     for dataset in sorted(dataset_markers.keys()):
         legend_elements.append(
             plt.Line2D([0], [0], marker=dataset_markers[dataset], color='gray', 
-                      markersize=15, label=f"Dataset: {dataset_map.get(dataset, dataset)}")
+                      markersize=15, label=dataset_map.get(dataset, dataset))
         )
+        labels.append(dataset_map.get(dataset, dataset))
     
-    # Example size indicators
-    legend_elements.append(
-        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
-                  markersize=6, label="Fairness: Low")
-    )
-    legend_elements.append(
-        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
-                  markersize=10, label="Fairness: Medium")
-    )
-    legend_elements.append(
-        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
-                  markersize=15, label="Fairness: High")
-    )
+    # Add empty element to align with other columns
+    legend_elements.append(plt.Line2D([0], [0], color='none'))
+    labels.append("")
     
-    # Create the legend
-    plt.legend(handles=legend_elements, loc='center', frameon=True, 
-              fancybox=True, shadow=True, ncol=1, fontsize=18)
+    # Third column: Fairness levels
+    sizes = [15, 10, 6]  # Large to small for visual hierarchy
+    for size, label in zip(sizes, ["Fairness: Low", "Fairness: Medium", "Fairness: High"]):
+        legend_elements.append(
+            plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', 
+                      markersize=size, label=label)
+        )
+        labels.append(label)
+    
+    # Create single legend with grid layout
+    plt.legend(handles=legend_elements, labels=labels,
+              ncol=3,          # 3 columns
+              columnspacing=4,  # Space between columns
+              handletextpad=1,  # Space between handle and text
+              loc='center',
+              fontsize=18)
     
     # Save the legend
     for fmt in ["eps", "pdf", "png"]:
@@ -1345,6 +1356,11 @@ def create_fairness_performance_latex_grid(results_dir):
     
     fairness_metrics = ["EODD", "EOP"]
     attributes = ["age", "gender", "ethnicity"]
+    attribute_labels = {
+        "age": "Age",
+        "gender": "Sex",
+        "ethnicity": "Race"
+    }
     
     latex_content = []
     
@@ -1370,7 +1386,7 @@ def create_fairness_performance_latex_grid(results_dir):
                 latex_content.append(r"\begin{subfigure}[t]{0.3\textwidth}")
                 latex_content.append(r"    \centering")
                 latex_content.append(r"    \includegraphics[width=\linewidth]{" + plot_path + "}")
-                latex_content.append(r"    \caption{" + f"{attribute.capitalize()}" + "}")
+                latex_content.append(r"    \caption{" + f"{attribute_labels[attribute]}" + "}")
                 latex_content.append(r"\end{subfigure}")
                 
                 # Add separator between columns (except for the last column)

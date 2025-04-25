@@ -39,7 +39,7 @@ def create_temp_config(template_path: str, results_path: str, lambda_value: str)
 
 def extract_lambda(dirname: str) -> str:
     """Extract lambda value from directory name."""
-    match = re.search(r'lambda_([^_]+)', dirname)
+    match = re.search(r'lambda_opt_([^_]+)', dirname)
     if match:
         return match.group(1)
     raise ValueError(f"Could not extract lambda value from directory name: {dirname}")
