@@ -18,6 +18,6 @@
 conda deactivate
 conda activate pix
 
-cd "/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/dfci_evaluation/processing"
+cd "/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/dfci_evaluation/prediction"
 
-python process_images.py --opt=options/ucsf_diffusion_tum.yml
+python prediction.py --opt=options/chex_diffusion_tum.yml

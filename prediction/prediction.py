@@ -61,7 +61,7 @@ def load_reconstruction_model(config, device):
             network = UNetUCSF()
         model.set_network(network)
         model.load_state_dict(
-            torch.load(model_config["model_path"], map_location=device)
+            torch.load(model_config["model_path"], map_location=device, weights_only=False)
         )
         model.network.eval()
         model.to(device)
@@ -71,7 +71,7 @@ def load_reconstruction_model(config, device):
 
         model = UnetGenerator(input_nc=1, output_nc=1, num_downs=7)
         model.load_state_dict(
-            torch.load(model_config["model_path"], map_location=device)
+            torch.load(model_config["model_path"], map_location=device, weights_only=False)
         )
         model.eval()
         model.to(device)
@@ -134,7 +134,7 @@ def load_reconstruction_model(config, device):
 
 def load_task_model(config, device):
     if config["name"] == "chexpert-classifier":
-        model = torch.load(config["path"], map_location=device)
+        model = torch.load(config["path"], map_location=device, weights_only=False)
         model.to(device)
         return model
     elif config["name"] == "ucsf":
@@ -153,7 +153,7 @@ def load_task_model(config, device):
                 network = ResNetClassifierNetwork(num_classes=model.num_classes)
                 network.to(device)
                 model.set_network(network)
-                model.load_state_dict(torch.load(model_path, map_location=device))
+                model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False))
                 model.network.eval()
                 task_models.append((model_type, model_name, model))
             elif model_type == "segmentation":
@@ -173,7 +173,7 @@ def load_task_model(config, device):
                 network = network.to(device)
                 model.set_network(network)
                 model.load_state_dict(
-                    torch.load(model_path, map_location=torch.device("cpu"))
+                    torch.load(model_path, map_location=torch.device("cpu"), weights_only=False)
                 )
                 model.network.eval()
                 task_models.append((model_type, model_name, model))

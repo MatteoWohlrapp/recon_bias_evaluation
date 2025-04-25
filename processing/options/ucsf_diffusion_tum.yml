@@ -1,0 +1,52 @@
+name: ucsf-SDE-8-adv-non-normalized-opt-e290
+results_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/processed/ucsf
+batch_size: 16
+num_workers: 4
+
+paths:
+  recon_bias: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/recon_bias
+  pix2pix: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/pix2pix
+  sde: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde
+
+datasets:
+  name: ucsf
+  dataroot: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/UCSF-PDGM
+  sampling_mask: radial  # or linear
+  seed: 31415
+  type: FLAIR  # or other MRI type
+  pathology: []  # list of pathologies to include
+  lower_slice: 60
+  upper_slice: 130
+  split: test
+  num_rays: 60
+
+models:
+  network: Diffusion
+
+model: denoising
+distortion: deblur
+gpu_ids: [0]
+
+sde:
+  max_sigma: 10
+  T: 100
+  schedule: cosine # linear, cosine
+  eps: 0.005
+  
+degradation:
+  # for denoising
+  sigma: 25
+  noise_type: G
+
+
+network_G:
+  which_model_G: ConditionalUNet
+  setting:
+    in_nc: 1
+    out_nc: 1
+    nf: 64
+    depth: 4
+
+path:
+  pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/experiments/deblurring/ucsf8-sde-adv-non-normalized-opt/models/290_G.pth
+  strict_load: True

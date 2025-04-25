@@ -1,0 +1,33 @@
+name: ucsf_diffusion_8_adv_opt_e290
+results_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/prediction
+batch_size: 16
+num_workers: 4
+
+datasets:
+  name: ucsf
+  dataroot: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/UCSF-PDGM
+  processed_image_root: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/processed/ucsf/ucsf-SDE-8-adv-normalized-opt-e290
+  sampling_mask: radial  # or linear
+  seed: 31415
+  type: FLAIR  # or other MRI type
+  pathology: []  # list of pathologies to include
+  lower_slice: 60
+  upper_slice: 130
+  split: test
+  num_rays: 60
+
+models:
+  network: Diffusion
+
+task_models: 
+  name: ucsf
+  models: 
+    - type: classifier
+      name: TGradeBCEClassifier
+      path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/tgrade_test_20240925_113550_epoch_1_best.pth
+    - type: classifier
+      name: TTypeBCEClassifier
+      path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/ttype_test_20240925_113544_epoch_1_best.pth
+    - type: segmentation
+      name: UNet
+      path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/segmentation_20241126_225621_epoch_11.pth

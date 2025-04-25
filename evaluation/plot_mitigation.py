@@ -42,7 +42,7 @@ def create_latex_grid(run_name, results_dir):
     # Add legend
     latex_content.append(r"    \begin{subfigure}[t]{0.4\textwidth}")
     latex_content.append(r"        \centering")
-    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_legend.pdf" + "}")
+    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_legend.pdf" + "}")
     latex_content.append(r"    \end{subfigure}")
     latex_content.append("")
     
@@ -58,14 +58,14 @@ def create_latex_grid(run_name, results_dir):
         # Add first plot
         latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
-        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter1}.pdf" + "}")
+        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_{interpreter1}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
         latex_content.append(r"        &")
         
         # Add second plot
         latex_content.append(r"        \begin{subfigure}[t]{0.48\textwidth}")
         latex_content.append(r"            \centering")
-        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_{interpreter2}.pdf" + "}")
+        latex_content.append(r"            \includegraphics[width=\linewidth]{" + f"GR/fig/{run_name}/mitigation_comparison_{interpreter2}.pdf" + "}")
         latex_content.append(r"        \end{subfigure}")
         
         # Add line break unless it's the last pair
@@ -80,7 +80,7 @@ def create_latex_grid(run_name, results_dir):
     latex_content.append(r"    \vspace{0.5cm}")
     latex_content.append(r"    \begin{subfigure}[t]{0.48\textwidth}")
     latex_content.append(r"        \centering")
-    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_bias_average.pdf" + "}")
+    latex_content.append(r"        \includegraphics[width=\linewidth]{" + f"fig/{run_name}/mitigation_comparison_average.pdf" + "}")
     latex_content.append(r"    \end{subfigure}")
     latex_content.append("")
     

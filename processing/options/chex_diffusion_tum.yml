@@ -1,6 +1,6 @@
-name: chex_SDE-10000-fairness-10-2
+name: chex_SDE-10000-adv-non-normalized-opt-e40-2
 results_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/processed/chex
-batch_size: 32
+batch_size: 64
 num_workers: 8
 
 paths:
@@ -45,5 +45,5 @@ network_G:
     depth: 4
 
 path:
-  pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/experiments/deblurring/chex10000-sde-fairness-0001/models/10_G.pth
+  pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/experiments/deblurring/chex10000-sde-adv-non-normalized-opt/models/40_G.pth
   strict_load: True
